@@ -1,3 +1,4 @@
+D:\tech\NexaShop\backend\src\main\java\com\nexashop\backend\config\SecurityConfig.java
 D:\tech\NexaShop\backend\src\main\java\com\nexashop\backend\config\SwaggerConfig.java
 D:\tech\NexaShop\backend\src\main\java\com\nexashop\backend\controller\AdminController.java
 D:\tech\NexaShop\backend\src\main\java\com\nexashop\backend\controller\SellerController.java
@@ -11,4 +12,6 @@ D:\tech\NexaShop\backend\src\main\java\com\nexashop\backend\entity\SellerStatus.
 D:\tech\NexaShop\backend\src\main\java\com\nexashop\backend\NexaShopApplication.java
 D:\tech\NexaShop\backend\src\main\java\com\nexashop\backend\repository\AdminRepository.java
 D:\tech\NexaShop\backend\src\main\java\com\nexashop\backend\repository\SellerRepository.java
+D:\tech\NexaShop\backend\src\main\java\com\nexashop\backend\security\JwtAuthenticationFilter.java
+D:\tech\NexaShop\backend\src\main\java\com\nexashop\backend\security\JwtUtils.java
 D:\tech\NexaShop\backend\src\main\java\com\nexashop\backend\service\EmailService.java

@@ -1,6 +1,8 @@
 com\nexashop\backend\config\SwaggerConfig.class
 com\nexashop\backend\dto\SellerRegisterRequest.class
 com\nexashop\backend\controller\AdminController.class
+com\nexashop\backend\security\JwtAuthenticationFilter.class
+com\nexashop\backend\config\SecurityConfig.class
 com\nexashop\backend\dto\AdminLoginRequest.class
 com\nexashop\backend\NexaShopApplication.class
 com\nexashop\backend\dto\UpdateSellerStatusRequest.class
@@ -10,5 +12,6 @@ com\nexashop\backend\repository\SellerRepository.class
 com\nexashop\backend\entity\Admin.class
 com\nexashop\backend\entity\SellerStatus.class
 com\nexashop\backend\entity\Seller.class
+com\nexashop\backend\security\JwtUtils.class
 com\nexashop\backend\repository\AdminRepository.class
 com\nexashop\backend\dto\SellerLoginRequest.class
