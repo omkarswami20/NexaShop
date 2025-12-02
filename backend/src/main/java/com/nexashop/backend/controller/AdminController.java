@@ -51,6 +51,12 @@ public class AdminController {
         return ResponseEntity.ok(pendingSellers);
     }
 
+    @GetMapping("/sellers")
+    public ResponseEntity<List<Seller>> getAllSellers() {
+        List<Seller> sellers = sellerRepository.findAll();
+        return ResponseEntity.ok(sellers);
+    }
+
     @Operation(summary = "Update Seller Status", description = "Approve or Reject a seller. If Rejected, an optional reason can be provided.")
     @ApiResponse(responseCode = "200", description = "Status updated successfully")
     @ApiResponse(responseCode = "404", description = "Seller not found")

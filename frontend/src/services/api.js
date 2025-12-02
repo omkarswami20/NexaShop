@@ -42,6 +42,10 @@ export const api = createApi({
             query: () => '/admin/pending',
             providesTags: ['Seller'],
         }),
+        getAllSellers: builder.query({
+            query: () => '/admin/sellers',
+            providesTags: ['Seller'],
+        }),
         updateSellerStatus: builder.mutation({
             query: ({ sellerId, newStatus, rejectionReason }) => ({
                 url: '/admin/update-status',
@@ -58,5 +62,6 @@ export const {
     useLoginSellerMutation,
     useLoginAdminMutation,
     useGetPendingSellersQuery,
+    useGetAllSellersQuery,
     useUpdateSellerStatusMutation,
 } = api;

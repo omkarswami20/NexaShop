@@ -36,6 +36,8 @@ public class SecurityConfig {
                                                                                                          // allow
                                                                                                          // OPTIONS
                         .requestMatchers("/api/sellers/register", "/api/sellers/login", "/api/admin/login").permitAll()
+                        // .requestMatchers(org.springframework.http.HttpMethod.GET,
+                        // "/api/products/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session

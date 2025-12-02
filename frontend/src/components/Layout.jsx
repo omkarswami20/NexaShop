@@ -28,7 +28,8 @@ const Layout = () => {
     };
 
     return (
-        <Box sx={{ flexGrow: 1, minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+        <Box sx={{ flexGrow: 1, minHeight: '100vh', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+            <div className="mesh-gradient-bg" />
             <AppBar position="sticky">
                 <Container maxWidth="xl">
                     <Toolbar disableGutters>
@@ -41,12 +42,15 @@ const Layout = () => {
                             sx={{
                                 mr: 2,
                                 display: { xs: 'none', md: 'flex' },
-                                fontFamily: 'monospace',
-                                fontWeight: 700,
-                                letterSpacing: '.3rem',
+                                fontFamily: '"Outfit", sans-serif',
+                                fontWeight: 800,
+                                letterSpacing: '.1rem',
                                 color: 'inherit',
                                 textDecoration: 'none',
                                 flexGrow: 1,
+                                background: 'linear-gradient(90deg, #fff, #94A3B8)',
+                                WebkitBackgroundClip: 'text',
+                                WebkitTextFillColor: 'transparent',
                             }}
                         >
                             NEXASHOP
@@ -78,7 +82,7 @@ const Layout = () => {
                                         id="menu-appbar"
                                         anchorEl={anchorEl}
                                         anchorOrigin={{
-                                            vertical: 'top',
+                                            vertical: 'bottom',
                                             horizontal: 'right',
                                         }}
                                         keepMounted
@@ -88,6 +92,14 @@ const Layout = () => {
                                         }}
                                         open={Boolean(anchorEl)}
                                         onClose={handleClose}
+                                        PaperProps={{
+                                            sx: {
+                                                mt: 1.5,
+                                                bgcolor: 'background.paper',
+                                                backgroundImage: 'none',
+                                                border: '1px solid rgba(255,255,255,0.1)',
+                                            }
+                                        }}
                                     >
                                         {role === 'seller' && (
                                             <MenuItem onClick={() => { handleClose(); navigate('/seller/dashboard'); }}>Dashboard</MenuItem>
@@ -104,21 +116,20 @@ const Layout = () => {
                 </Container>
             </AppBar>
 
-            <Box component="main" sx={{ flexGrow: 1, py: 4, bgcolor: 'background.default' }}>
+            <Box component="main" sx={{ flexGrow: 1, py: 6 }}>
                 <Container maxWidth="lg">
                     <Outlet />
                 </Container>
             </Box>
 
-            <Box component="footer" sx={{ py: 3, px: 2, mt: 'auto', backgroundColor: (theme) => theme.palette.grey[200] }}>
+            <Box component="footer" sx={{ py: 4, mt: 'auto', borderTop: '1px solid rgba(255,255,255,0.05)', bgcolor: 'rgba(15, 23, 42, 0.5)' }}>
                 <Container maxWidth="sm">
                     <Typography variant="body2" color="text.secondary" align="center">
                         {'Copyright © '}
-                        <Link color="inherit" to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
+                        <Link to="/" style={{ textDecoration: 'none', color: 'inherit', fontWeight: 600 }}>
                             NexaShop
                         </Link>{' '}
                         {new Date().getFullYear()}
-                        {'.'}
                     </Typography>
                 </Container>
             </Box>
