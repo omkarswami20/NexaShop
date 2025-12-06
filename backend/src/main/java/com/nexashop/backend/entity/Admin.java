@@ -13,6 +13,7 @@ public class Admin {
     @Column(unique = true, nullable = false)
     private String email;
 
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private String password;
 
     public Admin() {

@@ -1,131 +1,152 @@
 package com.nexashop.backend.entity;
 
-// import jakarta.persistence.*;
+import jakarta.persistence.*;
 
-// import java.math.BigDecimal;
-// import java.time.LocalDateTime;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
-// @Entity
-// @Table(name = "products")
+@Entity
+@Table(name = "products")
 public class Product {
 
-    // @Id
-    // @GeneratedValue(strategy = GenerationType.IDENTITY)
-    // private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    // @Column(nullable = false)
-    // private String name;
+    @Column(nullable = false)
+    private String name;
 
-    // @Column(columnDefinition = "TEXT")
-    // private String description;
+    @Column(columnDefinition = "TEXT")
+    private String description;
 
-    // @Column(nullable = false)
-    // private BigDecimal price;
+    @Column(nullable = false)
+    private BigDecimal price;
 
-    // @Column(nullable = false)
-    // private Integer stockQuantity;
+    @Column(nullable = false)
+    private Integer stockQuantity;
 
-    // private String category;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private Category category;
 
-    // private String imageUrl;
+    private String imageUrl;
 
-    // @ManyToOne(fetch = FetchType.LAZY)
-    // @JoinColumn(name = "seller_id", nullable = false)
-    // private Seller seller;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ProductStatus status;
 
-    // private LocalDateTime createdAt;
-    // private LocalDateTime updatedAt;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "seller_id", nullable = false)
+    private Seller seller;
 
-    // @PrePersist
-    // protected void onCreate() {
-    // createdAt = LocalDateTime.now();
-    // updatedAt = LocalDateTime.now();
-    // }
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
-    // @PreUpdate
-    // protected void onUpdate() {
-    // updatedAt = LocalDateTime.now();
-    // }
+    public Product() {
+        this.status = ProductStatus.ACTIVE;
+    }
 
-    // // Getters and Setters
+    @PrePersist
+    protected void onCreate() {
+        if (status == null) {
+            status = ProductStatus.ACTIVE;
+        }
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
 
-    // public Long getId() {
-    // return id;
-    // }
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 
-    // public void setId(Long id) {
-    // this.id = id;
-    // }
+    // Getters and Setters
 
-    // public String getName() {
-    // return name;
-    // }
+    public Long getId() {
+        return id;
+    }
 
-    // public void setName(String name) {
-    // this.name = name;
-    // }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    // public String getDescription() {
-    // return description;
-    // }
+    public String getName() {
+        return name;
+    }
 
-    // public void setDescription(String description) {
-    // this.description = description;
-    // }
+    public void setName(String name) {
+        this.name = name;
+    }
 
-    // public BigDecimal getPrice() {
-    // return price;
-    // }
+    public String getDescription() {
+        return description;
+    }
 
-    // public void setPrice(BigDecimal price) {
-    // this.price = price;
-    // }
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-    // public Integer getStockQuantity() {
-    // return stockQuantity;
-    // }
+    public BigDecimal getPrice() {
+        return price;
+    }
 
-    // public void setStockQuantity(Integer stockQuantity) {
-    // this.stockQuantity = stockQuantity;
-    // }
+    public void setPrice(BigDecimal price) {
+        this.price = price;
+    }
 
-    // public String getCategory() {
-    // return category;
-    // }
+    public Integer getStockQuantity() {
+        return stockQuantity;
+    }
 
-    // public void setCategory(String category) {
-    // this.category = category;
-    // }
+    public void setStockQuantity(Integer stockQuantity) {
+        this.stockQuantity = stockQuantity;
+    }
 
-    // public String getImageUrl() {
-    // return imageUrl;
-    // }
+    public Category getCategory() {
+        return category;
+    }
 
-    // public void setImageUrl(String imageUrl) {
-    // this.imageUrl = imageUrl;
-    // }
+    public void setCategory(Category category) {
+        this.category = category;
+    }
 
-    // public Seller getSeller() {
-    // return seller;
-    // }
+    public String getImageUrl() {
+        return imageUrl;
+    }
 
-    // public void setSeller(Seller seller) {
-    // this.seller = seller;
-    // }
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
 
-    // public LocalDateTime getCreatedAt() {
-    // return createdAt;
-    // }
+    public Seller getSeller() {
+        return seller;
+    }
 
-    // public void setCreatedAt(LocalDateTime createdAt) {
-    // this.createdAt = createdAt;
-    // }
+    public void setSeller(Seller seller) {
+        this.seller = seller;
+    }
 
-    // public LocalDateTime getUpdatedAt() {
-    // return updatedAt;
-    // }
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
 
-    // public void setUpdatedAt(LocalDateTime updatedAt) {
-    // this.updatedAt = updatedAt;
-    // }
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public ProductStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(ProductStatus status) {
+        this.status = status;
+    }
 }

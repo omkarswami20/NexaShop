@@ -1,5 +1,6 @@
 package com.nexashop.backend.service;
 
+import com.nexashop.backend.entity.Seller;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -12,6 +13,9 @@ public class EmailService {
 
     @Value("${spring.mail.username}")
     private String fromEmail;
+
+    @Value("${app.frontend.url}")
+    private String frontendUrl;
 
     public EmailService(JavaMailSender mailSender) {
         this.mailSender = mailSender;
@@ -31,7 +35,7 @@ public class EmailService {
         }
     }
 
-    public void sendVerificationEmail(com.nexashop.backend.entity.Seller seller) {
+    public void sendVerificationEmail(Seller seller) {
         String subject = "Welcome to Nexashop - Application Received";
         String text = "Dear " + seller.getName() + ",\n\n" +
                 "Thank you for registering with Nexashop. Your application has been received and is currently Pending Approval.\n"
@@ -42,17 +46,19 @@ public class EmailService {
         sendSimpleEmail(seller.getEmail(), subject, text);
     }
 
-    public void sendStatusNotification(com.nexashop.backend.entity.Seller seller, String rejectionReason) {
+    public void sendStatusNotification(Seller seller, String rejectionReason) {
         String subject = "Nexashop - Application Status Update";
         String text;
 
-        if (seller.getStatus() == com.nexashop.backend.entity.SellerStatus.APPROVED) {
+        if (seller.getStatus() == Seller.SellerStatus.APPROVED) {
+            String loginLink = frontendUrl + "/seller/login";
             text = "Dear " + seller.getName() + ",\n\n" +
                     "Congratulations! Your account has been APPROVED.\n" +
                     "You can now login to your dashboard and start selling.\n\n" +
+                    "Click here to login: " + loginLink + "\n\n" +
                     "Best Regards,\n" +
                     "Nexashop Team";
-        } else if (seller.getStatus() == com.nexashop.backend.entity.SellerStatus.DENIED) {
+        } else if (seller.getStatus() == Seller.SellerStatus.DENIED) {
             text = "Dear " + seller.getName() + ",\n\n" +
                     "We are sorry, but your application was DENIED.\n";
             if (rejectionReason != null && !rejectionReason.trim().isEmpty()) {

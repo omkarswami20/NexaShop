@@ -1,80 +1,74 @@
 package com.nexashop.backend.controller;
 
-import com.nexashop.backend.entity.Admin;
+import com.nexashop.backend.dto.AdminLoginRequest;
+import com.nexashop.backend.dto.LoginResponse;
+import com.nexashop.backend.dto.UpdateSellerStatusRequest;
 import com.nexashop.backend.entity.Seller;
-import com.nexashop.backend.entity.SellerStatus;
-import com.nexashop.backend.repository.AdminRepository;
 import com.nexashop.backend.repository.SellerRepository;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-
+import com.nexashop.backend.security.JwtUtils;
+import com.nexashop.backend.service.AdminAuthService;
+import com.nexashop.backend.service.EmailService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/admin")
 public class AdminController {
 
-    private final AdminRepository adminRepository;
+    private final AdminAuthService adminAuthService;
     private final SellerRepository sellerRepository;
-    private final com.nexashop.backend.service.EmailService emailService;
-    private final com.nexashop.backend.security.JwtUtils jwtUtils;
+    private final EmailService emailService;
+    private final JwtUtils jwtUtils;
+    private final com.nexashop.backend.service.RefreshTokenService refreshTokenService;
 
-    public AdminController(AdminRepository adminRepository, SellerRepository sellerRepository,
-            com.nexashop.backend.service.EmailService emailService, com.nexashop.backend.security.JwtUtils jwtUtils) {
-        this.adminRepository = adminRepository;
+    public AdminController(AdminAuthService adminAuthService, SellerRepository sellerRepository,
+            EmailService emailService, JwtUtils jwtUtils,
+            com.nexashop.backend.service.RefreshTokenService refreshTokenService) {
+        this.adminAuthService = adminAuthService;
         this.sellerRepository = sellerRepository;
         this.emailService = emailService;
         this.jwtUtils = jwtUtils;
+        this.refreshTokenService = refreshTokenService;
     }
 
+    // -------- LOGIN ONLY OPEN ENDPOINT -------- //
     @PostMapping("/login")
-    public ResponseEntity<?> loginAdmin(@RequestBody com.nexashop.backend.dto.AdminLoginRequest request) {
-        String email = request.getEmail();
-        String password = request.getPassword();
-
-        Optional<Admin> adminOpt = adminRepository.findByEmail(email);
-
-        if (adminOpt.isPresent() && adminOpt.get().getPassword().equals(password)) {
-            String token = jwtUtils.generateToken(adminOpt.get().getEmail());
-            return ResponseEntity.ok(java.util.Map.of("token", token));
+    public ResponseEntity<?> loginAdmin(@RequestBody AdminLoginRequest request) {
+        if (adminAuthService.validateCredentials(request.getEmail(), request.getPassword())) {
+            String token = jwtUtils.generateToken(request.getEmail(), "ROLE_ADMIN");
+            com.nexashop.backend.entity.RefreshToken refreshToken = refreshTokenService
+                    .createRefreshToken(request.getEmail());
+            return ResponseEntity.ok(new LoginResponse(token, refreshToken.getToken()));
         }
-        return ResponseEntity.status(401).body("Fail");
+        return ResponseEntity.status(401).body("Invalid Credentials");
     }
 
+    // ------------ PROTECTED ENDPOINTS ------------ //
+
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @GetMapping("/pending")
     public ResponseEntity<List<Seller>> getPendingSellers() {
-        List<Seller> pendingSellers = sellerRepository.findByStatus(SellerStatus.PENDING_APPROVAL);
-        return ResponseEntity.ok(pendingSellers);
+        return ResponseEntity.ok(sellerRepository.findByStatus(Seller.SellerStatus.PENDING_APPROVAL));
     }
 
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @GetMapping("/sellers")
     public ResponseEntity<List<Seller>> getAllSellers() {
-        List<Seller> sellers = sellerRepository.findAll();
-        return ResponseEntity.ok(sellers);
+        return ResponseEntity.ok(sellerRepository.findAll());
     }
 
-    @Operation(summary = "Update Seller Status", description = "Approve or Reject a seller. If Rejected, an optional reason can be provided.")
-    @ApiResponse(responseCode = "200", description = "Status updated successfully")
-    @ApiResponse(responseCode = "404", description = "Seller not found")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PutMapping("/update-status")
-    public ResponseEntity<?> updateSellerStatus(
-            @RequestBody com.nexashop.backend.dto.UpdateSellerStatusRequest request) {
-        Long sellerId = request.getSellerId();
-        SellerStatus newStatus = request.getNewStatus();
-
-        Optional<Seller> sellerOpt = sellerRepository.findById(sellerId);
-        if (sellerOpt.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-
-        Seller seller = sellerOpt.get();
-        seller.setStatus(newStatus);
-        Seller updatedSeller = sellerRepository.save(seller);
-        emailService.sendStatusNotification(updatedSeller, request.getRejectionReason());
-        return ResponseEntity.ok(updatedSeller);
+    public ResponseEntity<?> updateSellerStatus(@RequestBody UpdateSellerStatusRequest request) {
+        return sellerRepository.findById(request.getSellerId())
+                .map(seller -> {
+                    seller.setStatus(request.getNewStatus());
+                    Seller updatedSeller = sellerRepository.save(seller);
+                    emailService.sendStatusNotification(updatedSeller, request.getRejectionReason());
+                    return ResponseEntity.ok(updatedSeller);
+                }).orElse(ResponseEntity.notFound().build());
     }
 }

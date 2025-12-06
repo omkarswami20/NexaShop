@@ -15,6 +15,7 @@ public class Seller {
     @Column(unique = true, nullable = false)
     private String email;
 
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private String password;
 
     private String storeName;
@@ -73,6 +74,12 @@ public class Seller {
 
     public void setStoreName(String storeName) {
         this.storeName = storeName;
+    }
+
+    public enum SellerStatus {
+        APPROVED,
+        DENIED,
+        PENDING_APPROVAL
     }
 
     public SellerStatus getStatus() {
