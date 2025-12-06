@@ -37,13 +37,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 email = jwtUtils.getEmailFromToken(token);
             }
 
-            if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                if (jwtUtils.validateToken(token)) {
-                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                            email, null, new ArrayList<>()); // Roles can be added here later
-                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    SecurityContextHolder.getContext().setAuthentication(authToken);
+            if (email != null && jwtUtils.validateToken(token)) {
+                String role = jwtUtils.extractRole(token);
+                java.util.List<org.springframework.security.core.authority.SimpleGrantedAuthority> authorities = new ArrayList<>();
+
+                if (role != null) {
+                    authorities.add(new org.springframework.security.core.authority.SimpleGrantedAuthority(role));
                 }
+
+                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                        email, null, authorities);
+                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         } catch (JwtException | IllegalArgumentException e) {
             // Token is invalid/expired. We log it and move on.

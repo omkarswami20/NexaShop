@@ -1,7 +1,6 @@
 package com.nexashop.backend.repository;
 
 import com.nexashop.backend.entity.Seller;
-import com.nexashop.backend.entity.SellerStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 import java.util.Optional;
@@ -9,5 +8,5 @@ import java.util.Optional;
 public interface SellerRepository extends JpaRepository<Seller, Long> {
     Optional<Seller> findByEmail(String email);
 
-    List<Seller> findByStatus(SellerStatus status);
+    List<Seller> findByStatus(Seller.SellerStatus status);
 }
