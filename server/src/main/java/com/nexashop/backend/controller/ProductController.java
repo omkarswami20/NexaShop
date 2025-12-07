@@ -30,7 +30,7 @@ public class ProductController {
     }
 
     @Operation(summary = "Get all products for the current seller", security = @SecurityRequirement(name = "bearerAuth"))
-    @GetMapping("/sellerList")
+    @GetMapping("/seller")
     public ResponseEntity<Map<String, Object>> getSellerProducts(
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String category,
