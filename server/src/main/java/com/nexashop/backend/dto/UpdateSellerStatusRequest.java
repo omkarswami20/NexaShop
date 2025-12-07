@@ -2,10 +2,16 @@ package com.nexashop.backend.dto;
 
 import com.nexashop.backend.entity.Seller;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 
 public class UpdateSellerStatusRequest {
+
+    @NotNull(message = "Seller ID is required")
     private Long sellerId;
+
+    @NotNull(message = "New status is required")
     private Seller.SellerStatus newStatus;
+
     @Schema(description = "Optional reason for rejection. Required only when status is DENIED.", example = "Invalid Store Name")
     private String rejectionReason;
 

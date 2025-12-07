@@ -4,10 +4,8 @@ import com.nexashop.backend.dto.AdminLoginRequest;
 import com.nexashop.backend.dto.LoginResponse;
 import com.nexashop.backend.dto.UpdateSellerStatusRequest;
 import com.nexashop.backend.entity.Seller;
-import com.nexashop.backend.repository.SellerRepository;
-import com.nexashop.backend.security.JwtUtils;
 import com.nexashop.backend.service.AdminAuthService;
-import com.nexashop.backend.service.EmailService;
+import com.nexashop.backend.service.SellerService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -19,31 +17,17 @@ import java.util.List;
 public class AdminController {
 
     private final AdminAuthService adminAuthService;
-    private final SellerRepository sellerRepository;
-    private final EmailService emailService;
-    private final JwtUtils jwtUtils;
-    private final com.nexashop.backend.service.RefreshTokenService refreshTokenService;
+    private final SellerService sellerService;
 
-    public AdminController(AdminAuthService adminAuthService, SellerRepository sellerRepository,
-            EmailService emailService, JwtUtils jwtUtils,
-            com.nexashop.backend.service.RefreshTokenService refreshTokenService) {
+    public AdminController(AdminAuthService adminAuthService, SellerService sellerService) {
         this.adminAuthService = adminAuthService;
-        this.sellerRepository = sellerRepository;
-        this.emailService = emailService;
-        this.jwtUtils = jwtUtils;
-        this.refreshTokenService = refreshTokenService;
+        this.sellerService = sellerService;
     }
 
     // -------- LOGIN ONLY OPEN ENDPOINT -------- //
     @PostMapping("/login")
-    public ResponseEntity<?> loginAdmin(@RequestBody AdminLoginRequest request) {
-        if (adminAuthService.validateCredentials(request.getEmail(), request.getPassword())) {
-            String token = jwtUtils.generateToken(request.getEmail(), "ROLE_ADMIN");
-            com.nexashop.backend.entity.RefreshToken refreshToken = refreshTokenService
-                    .createRefreshToken(request.getEmail());
-            return ResponseEntity.ok(new LoginResponse(token, refreshToken.getToken()));
-        }
-        return ResponseEntity.status(401).body("Invalid Credentials");
+    public ResponseEntity<LoginResponse> loginAdmin(@RequestBody AdminLoginRequest request) {
+        return ResponseEntity.ok(adminAuthService.login(request));
     }
 
     // ------------ PROTECTED ENDPOINTS ------------ //
@@ -51,24 +35,18 @@ public class AdminController {
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @GetMapping("/pending")
     public ResponseEntity<List<Seller>> getPendingSellers() {
-        return ResponseEntity.ok(sellerRepository.findByStatus(Seller.SellerStatus.PENDING_APPROVAL));
+        return ResponseEntity.ok(sellerService.getPendingSellers());
     }
 
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @GetMapping("/sellers")
     public ResponseEntity<List<Seller>> getAllSellers() {
-        return ResponseEntity.ok(sellerRepository.findAll());
+        return ResponseEntity.ok(sellerService.getAllSellers());
     }
 
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PutMapping("/update-status")
-    public ResponseEntity<?> updateSellerStatus(@RequestBody UpdateSellerStatusRequest request) {
-        return sellerRepository.findById(request.getSellerId())
-                .map(seller -> {
-                    seller.setStatus(request.getNewStatus());
-                    Seller updatedSeller = sellerRepository.save(seller);
-                    emailService.sendStatusNotification(updatedSeller, request.getRejectionReason());
-                    return ResponseEntity.ok(updatedSeller);
-                }).orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<Seller> updateSellerStatus(@RequestBody UpdateSellerStatusRequest request) {
+        return ResponseEntity.ok(sellerService.updateSellerStatus(request));
     }
 }

@@ -34,7 +34,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             if (authHeader != null && authHeader.startsWith("Bearer ")) {
                 token = authHeader.substring(7);
+                System.out.println("JwtAuthenticationFilter: Processing token: "
+                        + token.substring(0, Math.min(10, token.length())) + "...");
                 email = jwtUtils.getEmailFromToken(token);
+                System.out.println("JwtAuthenticationFilter: Email from token: " + email);
+            } else {
+                System.out.println("JwtAuthenticationFilter: No Bearer token found in header");
             }
 
             if (email != null && jwtUtils.validateToken(token)) {
@@ -54,6 +59,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             // Token is invalid/expired. We log it and move on.
             // The user will be unauthenticated.
             logger.error("JWT Authentication failed: " + e.getMessage());
+            e.printStackTrace();
         }
 
         filterChain.doFilter(request, response);
