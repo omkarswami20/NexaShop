@@ -33,7 +33,7 @@ public class SellerController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> loginSeller(@RequestBody SellerLoginRequest request) {
+    public ResponseEntity<LoginResponse> loginSeller(@Valid @RequestBody SellerLoginRequest request) {
         return ResponseEntity.ok(sellerService.loginSeller(request));
     }
 }

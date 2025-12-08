@@ -6,6 +6,7 @@ import com.nexashop.backend.dto.UpdateSellerStatusRequest;
 import com.nexashop.backend.entity.Seller;
 import com.nexashop.backend.service.AdminAuthService;
 import com.nexashop.backend.service.SellerService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -26,7 +27,7 @@ public class AdminController {
 
     // -------- LOGIN ONLY OPEN ENDPOINT -------- //
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> loginAdmin(@RequestBody AdminLoginRequest request) {
+    public ResponseEntity<LoginResponse> loginAdmin(@Valid @RequestBody AdminLoginRequest request) {
         return ResponseEntity.ok(adminAuthService.login(request));
     }
 
@@ -46,7 +47,7 @@ public class AdminController {
 
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PutMapping("/update-status")
-    public ResponseEntity<Seller> updateSellerStatus(@RequestBody UpdateSellerStatusRequest request) {
+    public ResponseEntity<Seller> updateSellerStatus(@Valid @RequestBody UpdateSellerStatusRequest request) {
         return ResponseEntity.ok(sellerService.updateSellerStatus(request));
     }
 }

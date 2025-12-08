@@ -73,7 +73,7 @@ public class SellerService {
         String token = jwtUtils.generateToken(seller.getEmail(), "ROLE_SELLER");
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(seller.getEmail());
 
-        return new LoginResponse(token, refreshToken.getToken());
+        return new LoginResponse(token, refreshToken.getToken(), seller.getName(), seller.getEmail(), "ROLE_SELLER");
     }
 
     public List<Seller> getPendingSellers() {

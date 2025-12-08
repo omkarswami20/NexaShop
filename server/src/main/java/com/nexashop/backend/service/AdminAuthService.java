@@ -32,6 +32,6 @@ public class AdminAuthService {
 
         String token = jwtUtils.generateToken(request.getEmail(), "ROLE_ADMIN");
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(request.getEmail());
-        return new LoginResponse(token, refreshToken.getToken());
+        return new LoginResponse(token, refreshToken.getToken(), "Admin User", request.getEmail(), "ROLE_ADMIN");
     }
 }

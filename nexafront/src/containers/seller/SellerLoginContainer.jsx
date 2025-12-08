@@ -16,7 +16,11 @@ const SellerLoginContainer = () => {
         e.preventDefault();
         try {
             const userData = await loginSeller({ email, password }).unwrap();
-            dispatch(setCredentials({ user: email, token: userData.token, role: 'seller' }));
+            dispatch(setCredentials({
+                user: { name: userData.name, email: userData.email },
+                token: userData.token,
+                role: userData.role
+            }));
             navigate('/seller/dashboard');
         } catch (err) {
             console.error('Login failed:', err);

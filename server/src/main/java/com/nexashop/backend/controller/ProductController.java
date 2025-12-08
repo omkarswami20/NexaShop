@@ -66,20 +66,17 @@ public class ProductController {
     @Operation(summary = "Update product status", security = @SecurityRequirement(name = "bearerAuth"))
     @PatchMapping("/{id}/status")
     public ResponseEntity<Product> updateProductStatus(@PathVariable Long id,
-            @RequestBody Map<String, String> request, Principal principal) {
-        String status = request.get("status");
-        return ResponseEntity.ok(productService.updateProductStatus(id, status, principal.getName()));
+            @Valid @RequestBody com.nexashop.backend.dto.ProductStatusRequest request, Principal principal) {
+        return ResponseEntity
+                .ok(productService.updateProductStatus(id, request.getStatus(), principal.getName()));
     }
 
     @Operation(summary = "Update product stock", security = @SecurityRequirement(name = "bearerAuth"))
     @PatchMapping("/{id}/stock")
     public ResponseEntity<Product> updateProductStock(@PathVariable Long id,
-            @RequestBody Map<String, Integer> request, Principal principal) {
-        Integer stock = request.get("stockQuantity");
-        if (stock == null) {
-            return ResponseEntity.badRequest().build();
-        }
-        return ResponseEntity.ok(productService.updateProductStock(id, stock, principal.getName()));
+            @Valid @RequestBody com.nexashop.backend.dto.ProductStockRequest request, Principal principal) {
+        return ResponseEntity.ok(productService.updateProductStock(id, request.getStockQuantity(),
+                principal.getName()));
     }
 
     @Operation(summary = "Get all products (Public - Active only)")
