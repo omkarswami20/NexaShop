@@ -20,6 +20,10 @@ public class SellerRegisterRequest {
     @NotBlank(message = "Store name is required")
     private String storeName;
 
+    @NotBlank(message = "Phone number is required")
+    @Size(min = 10, max = 10, message = "Phone number must be exactly 10 digits")
+    private String phoneNumber;
+
     // Getters and Setters
     public String getName() {
         return name;
@@ -51,5 +55,13 @@ public class SellerRegisterRequest {
 
     public void setStoreName(String storeName) {
         this.storeName = storeName;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 }

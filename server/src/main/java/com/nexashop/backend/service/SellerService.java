@@ -27,41 +27,70 @@ public class SellerService {
     private final JwtUtils jwtUtils;
     private final RefreshTokenService refreshTokenService;
 
+    private final OtpService otpService;
+
     public SellerService(SellerRepository sellerRepository,
             EmailService emailService,
             PasswordEncoder passwordEncoder,
             JwtUtils jwtUtils,
-            RefreshTokenService refreshTokenService) {
+            RefreshTokenService refreshTokenService,
+            OtpService otpService) {
         this.sellerRepository = sellerRepository;
         this.emailService = emailService;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtils = jwtUtils;
         this.refreshTokenService = refreshTokenService;
+        this.otpService = otpService;
     }
 
     public Seller registerSeller(SellerRegisterRequest request) {
         if (sellerRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new IllegalArgumentException("Email already exists");
         }
+        if (sellerRepository.findByPhoneNumber(request.getPhoneNumber()).isPresent()) {
+            throw new IllegalArgumentException("Phone number already exists");
+        }
 
         Seller seller = new Seller();
         seller.setName(request.getName());
         seller.setEmail(request.getEmail());
+        seller.setPhoneNumber(request.getPhoneNumber());
         seller.setPassword(passwordEncoder.encode(request.getPassword()));
         seller.setStoreName(request.getStoreName());
         seller.setStatus(Seller.SellerStatus.PENDING_APPROVAL);
 
+        // Generate OTP
+        String otp = otpService.generateOtp();
+        seller.setOtp(otp);
+        seller.setOtpExpiry(java.time.LocalDateTime.now().plusMinutes(5));
+        seller.setPhoneVerified(false);
+        seller.setEmailVerified(false);
+
         Seller savedSeller = sellerRepository.save(seller);
-        emailService.sendVerificationEmail(savedSeller);
+
+        // Send OTP
+        otpService.sendOtp(savedSeller.getPhoneNumber(), otp);
+
+        // Don't send welcome email yet, wait for verifications
+        // emailService.sendVerificationEmail(savedSeller);
+
         return savedSeller;
     }
 
-    public LoginResponse loginSeller(SellerLoginRequest request) {
-        Seller seller = sellerRepository.findByEmail(request.getEmail())
+    public LoginResponse loginSeller(com.nexashop.backend.dto.LoginRequest request) {
+        Seller seller = sellerRepository.findByEmailOrPhoneNumber(request.getIdentifier(), request.getIdentifier())
                 .orElseThrow(() -> new BadCredentialsException("Invalid Credentials"));
 
         if (!passwordEncoder.matches(request.getPassword(), seller.getPassword())) {
             throw new BadCredentialsException("Invalid Credentials");
+        }
+
+        if (!seller.isPhoneVerified()) {
+            throw new AccessDeniedException("Login Failed: Phone number not verified.");
+        }
+
+        if (!seller.isEmailVerified()) {
+            throw new AccessDeniedException("Login Failed: Email not verified.");
         }
 
         if (seller.getStatus() == Seller.SellerStatus.PENDING_APPROVAL) {
@@ -74,6 +103,52 @@ public class SellerService {
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(seller.getEmail());
 
         return new LoginResponse(token, refreshToken.getToken(), seller.getName(), seller.getEmail(), "ROLE_SELLER");
+    }
+
+    public void verifyOtp(String identifier, String otp) {
+        Seller seller = sellerRepository.findByEmailOrPhoneNumber(identifier, identifier)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        if (seller.isPhoneVerified()) {
+            return; // Already verified
+        }
+
+        if (seller.getOtp() == null || !seller.getOtp().equals(otp)) {
+            throw new IllegalArgumentException("Invalid OTP");
+        }
+
+        if (seller.getOtpExpiry().isBefore(java.time.LocalDateTime.now())) {
+            throw new IllegalArgumentException("OTP Expired");
+        }
+
+        seller.setPhoneVerified(true);
+        seller.setOtp(null);
+        seller.setOtpExpiry(null);
+
+        // Generate Email Verification Token
+        String token = java.util.UUID.randomUUID().toString();
+        seller.setEmailVerificationToken(token);
+
+        sellerRepository.save(seller);
+
+        // Send Email Verification Link
+        emailService.sendEmailVerificationLink(seller);
+    }
+
+    public void verifyEmail(String token) {
+        Seller seller = sellerRepository.findByEmailVerificationToken(token)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid Token"));
+
+        if (seller.isEmailVerified()) {
+            return;
+        }
+
+        seller.setEmailVerified(true);
+        seller.setEmailVerificationToken(null);
+        sellerRepository.save(seller);
+
+        // Now send the "Application Received / Wait for Approval" email
+        emailService.sendVerificationEmail(seller);
     }
 
     public List<Seller> getPendingSellers() {

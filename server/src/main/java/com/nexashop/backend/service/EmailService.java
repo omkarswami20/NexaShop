@@ -46,6 +46,18 @@ public class EmailService {
         sendSimpleEmail(seller.getEmail(), subject, text);
     }
 
+    public void sendEmailVerificationLink(Seller seller) {
+        String subject = "Nexashop - Verify Your Email";
+        String link = frontendUrl + "/verify-email?token=" + seller.getEmailVerificationToken();
+        String text = "Dear " + seller.getName() + ",\n\n" +
+                "Please verify your email address by clicking the link below:\n" +
+                link + "\n\n" +
+                "This link will expire in 24 hours.\n\n" +
+                "Best Regards,\n" +
+                "Nexashop Team";
+        sendSimpleEmail(seller.getEmail(), subject, text);
+    }
+
     public void sendStatusNotification(Seller seller, String rejectionReason) {
         String subject = "Nexashop - Application Status Update";
         String text;

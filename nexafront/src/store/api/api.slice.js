@@ -72,6 +72,20 @@ export const api = createApi({
                 body: credentials,
             }),
         }),
+        verifyOtp: builder.mutation({
+            query: (data) => ({
+                url: '/auth/verify-otp',
+                method: 'POST',
+                body: data,
+            }),
+        }),
+        verifyEmail: builder.mutation({
+            query: (data) => ({
+                url: '/auth/verify-email',
+                method: 'POST',
+                body: data,
+            }),
+        }),
 
         // Admin Endpoints
         loginAdmin: builder.mutation({
@@ -263,6 +277,8 @@ export const api = createApi({
 export const {
     useRegisterSellerMutation,
     useLoginSellerMutation,
+    useVerifyOtpMutation,
+    useVerifyEmailMutation,
     useLoginAdminMutation,
     useLogoutUserMutation,
     useGetPendingSellersQuery,

@@ -11,20 +11,23 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
-public class AuthController {
+public class AuthController implements com.nexashop.backend.controller.api.AuthApi {
     private final com.nexashop.backend.service.RefreshTokenService refreshTokenService;
     private final com.nexashop.backend.security.JwtUtils jwtUtils;
     private final com.nexashop.backend.repository.SellerRepository sellerRepository;
+    private final com.nexashop.backend.service.SellerService sellerService;
 
     public AuthController(com.nexashop.backend.service.RefreshTokenService refreshTokenService,
             com.nexashop.backend.security.JwtUtils jwtUtils,
-            com.nexashop.backend.repository.SellerRepository sellerRepository) {
+            com.nexashop.backend.repository.SellerRepository sellerRepository,
+            com.nexashop.backend.service.SellerService sellerService) {
         this.refreshTokenService = refreshTokenService;
         this.jwtUtils = jwtUtils;
         this.sellerRepository = sellerRepository;
+        this.sellerService = sellerService;
     }
 
-    @Operation(summary = "Refresh Access Token")
+    @Override
     @PostMapping("/refresh-token")
     public ResponseEntity<?> refreshtoken(
             @org.springframework.web.bind.annotation.RequestBody com.nexashop.backend.dto.TokenRefreshRequest request) {
@@ -42,7 +45,24 @@ public class AuthController {
                 }).orElseThrow(() -> new RuntimeException("Refresh token is not in database!"));
     }
 
-    @Operation(summary = "Logout user", security = @SecurityRequirement(name = "bearerAuth"))
+    @Override
+    @PostMapping("/verify-otp")
+    public ResponseEntity<?> verifyOtp(
+            @org.springframework.web.bind.annotation.RequestBody com.nexashop.backend.dto.VerifyOtpRequest request) {
+        sellerService.verifyOtp(request.getIdentifier(), request.getOtp());
+        return ResponseEntity
+                .ok(Map.of("message", "OTP verified successfully. Please check your email for verification link."));
+    }
+
+    @Override
+    @PostMapping("/verify-email")
+    public ResponseEntity<?> verifyEmail(
+            @org.springframework.web.bind.annotation.RequestBody com.nexashop.backend.dto.VerifyEmailRequest request) {
+        sellerService.verifyEmail(request.getToken());
+        return ResponseEntity.ok(Map.of("message", "Email verified successfully. Please wait for Admin Approval."));
+    }
+
+    @Override
     @PostMapping("/logout")
     public ResponseEntity<?> logoutUser() {
         // Since we are using stateless JWT, the server doesn't need to do much.

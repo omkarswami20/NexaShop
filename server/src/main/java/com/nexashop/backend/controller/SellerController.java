@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/sellers")
-public class SellerController {
+public class SellerController implements com.nexashop.backend.controller.api.SellerApi {
 
     private final SellerService sellerService;
 
@@ -22,18 +22,16 @@ public class SellerController {
         this.sellerService = sellerService;
     }
 
-    @Operation(summary = "Register a new Seller", description = "Creates a new seller account with PENDING_APPROVAL status and sends a verification email.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Registration successful"),
-            @ApiResponse(responseCode = "400", description = "Email already exists")
-    })
+    @Override
     @PostMapping("/register")
     public ResponseEntity<Seller> registerSeller(@Valid @RequestBody SellerRegisterRequest request) {
         return ResponseEntity.ok(sellerService.registerSeller(request));
     }
 
+    @Override
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> loginSeller(@Valid @RequestBody SellerLoginRequest request) {
+    public ResponseEntity<LoginResponse> loginSeller(
+            @Valid @RequestBody com.nexashop.backend.dto.LoginRequest request) {
         return ResponseEntity.ok(sellerService.loginSeller(request));
     }
 }

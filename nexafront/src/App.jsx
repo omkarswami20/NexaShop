@@ -8,11 +8,13 @@ import SellerDashboard from './pages/SellerDashboard';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
 import ProtectedRoute from './components/common/ProtectedRoute';
+import EmailVerification from './pages/EmailVerification';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<Layout />}>
       <Route index element={<LandingPage />} />
+      <Route path="verify-email" element={<EmailVerification />} />
 
       {/* Seller Routes */}
       <Route path="seller/register" element={<SellerRegister />} />
