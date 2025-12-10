@@ -1,6 +1,6 @@
 package com.nexashop.backend.service;
 
-import com.nexashop.backend.dto.CategoryRequest;
+import com.nexashop.backend.dto.ProductDtos;
 import com.nexashop.backend.entity.Category;
 import com.nexashop.backend.exception.ResourceNotFoundException;
 import com.nexashop.backend.repository.CategoryRepository;
@@ -23,19 +23,19 @@ public class CategoryService {
         return categoryRepository.findAll();
     }
 
-    public Category createCategory(CategoryRequest request) {
+    public Category createCategory(ProductDtos.CategoryRequest request) {
         Category category = new Category();
-        category.setName(request.getName());
-        category.setDescription(request.getDescription());
+        category.setName(request.name());
+        category.setDescription(request.description());
         return categoryRepository.save(category);
     }
 
-    public Category updateCategory(Long id, CategoryRequest request) {
+    public Category updateCategory(Long id, ProductDtos.CategoryRequest request) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
 
-        category.setName(request.getName());
-        category.setDescription(request.getDescription());
+        category.setName(request.name());
+        category.setDescription(request.description());
         return categoryRepository.save(category);
     }
 

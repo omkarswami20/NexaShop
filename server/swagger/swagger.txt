@@ -1,1 +1,5 @@
-http://localhost:8080/swagger-ui/index.html
+Swagger UI URL: http://localhost:8080/swagger-ui/index.html
+OpenAPI JSON URL: http://localhost:8080/v3/api-docs
+
+Status: Fixed dependency conflict between Spring Boot 3.4.0 and Springdoc.
+Updated springdoc-openapi-starter-webmvc-ui to version 2.7.0.

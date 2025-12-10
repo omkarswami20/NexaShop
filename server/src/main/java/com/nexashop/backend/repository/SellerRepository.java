@@ -8,5 +8,11 @@ import java.util.Optional;
 public interface SellerRepository extends JpaRepository<Seller, Long> {
     Optional<Seller> findByEmail(String email);
 
+    Optional<Seller> findByPhoneNumber(String phoneNumber);
+
+    Optional<Seller> findByEmailOrPhoneNumber(String email, String phoneNumber);
+
+    Optional<Seller> findByEmailVerificationToken(String token);
+
     List<Seller> findByStatus(Seller.SellerStatus status);
 }

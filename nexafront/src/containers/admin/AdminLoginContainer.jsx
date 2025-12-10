@@ -16,7 +16,7 @@ const AdminLoginContainer = () => {
         e.preventDefault();
         try {
             const userData = await loginAdmin({ email, password }).unwrap();
-            dispatch(setCredentials({ user: email, token: userData.token, role: 'admin' }));
+            dispatch(setCredentials({ user: email, token: userData.token, role: 'ROLE_ADMIN' }));
             navigate('/admin/dashboard');
         } catch (err) {
             console.error('Login failed:', err);

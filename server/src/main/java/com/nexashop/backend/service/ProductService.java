@@ -1,6 +1,6 @@
 package com.nexashop.backend.service;
 
-import com.nexashop.backend.dto.ProductRequest;
+import com.nexashop.backend.dto.ProductDtos;
 import com.nexashop.backend.entity.Category;
 import com.nexashop.backend.entity.Product;
 import com.nexashop.backend.entity.ProductStatus;
@@ -38,7 +38,7 @@ public class ProductService {
                 .orElseThrow(() -> new ResourceNotFoundException("Seller not found for email: " + email));
     }
 
-    public Product addProduct(ProductRequest request, String sellerEmail) {
+    public Product addProduct(ProductDtos.ProductRequest request, String sellerEmail) {
         Seller seller = getSellerByEmail(sellerEmail);
 
         Product product = new Product();
@@ -54,7 +54,7 @@ public class ProductService {
         return productRepository.save(product);
     }
 
-    public Product updateProduct(Long id, ProductRequest request, String sellerEmail) {
+    public Product updateProduct(Long id, ProductDtos.ProductRequest request, String sellerEmail) {
         Product product = getProductOwnedBySeller(id, sellerEmail);
         updateProductFromRequest(product, request);
         return productRepository.save(product);
@@ -169,23 +169,23 @@ public class ProductService {
         return product;
     }
 
-    private void updateProductFromRequest(Product product, ProductRequest request) {
-        product.setName(request.getName());
-        product.setDescription(request.getDescription());
-        product.setPrice(request.getPrice());
-        product.setStockQuantity(request.getStockQuantity());
-        product.setImageUrl(request.getImageUrl());
+    private void updateProductFromRequest(Product product, ProductDtos.ProductRequest request) {
+        product.setName(request.name());
+        product.setDescription(request.description());
+        product.setPrice(request.price());
+        product.setStockQuantity(request.stockQuantity());
+        product.setImageUrl(request.imageUrl());
 
-        if (request.getStatus() != null) {
+        if (request.status() != null) {
             try {
-                product.setStatus(ProductStatus.valueOf(request.getStatus().toUpperCase()));
+                product.setStatus(ProductStatus.valueOf(request.status().toUpperCase()));
             } catch (IllegalArgumentException e) {
                 // Keep old status or default
             }
         }
 
-        if (request.getCategoryId() != null) {
-            Category cat = categoryRepository.findById(request.getCategoryId())
+        if (request.categoryId() != null) {
+            Category cat = categoryRepository.findById(request.categoryId())
                     .orElse(null); // Or throw exception if category required
             product.setCategory(cat);
         } else {

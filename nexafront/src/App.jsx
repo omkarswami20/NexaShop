@@ -8,11 +8,32 @@ import SellerDashboard from './pages/SellerDashboard';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
 import ProtectedRoute from './components/common/ProtectedRoute';
+import EmailVerification from './pages/EmailVerification';
+
+import CustomerRegister from './pages/CustomerRegister';
+import CustomerLogin from './pages/CustomerLogin';
+import ForgotPassword from './pages/ForgotPassword';
+
+import ProfileManagement from './pages/ProfileManagement';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path="/" element={<Layout />}>
       <Route index element={<LandingPage />} />
+      <Route path="verify-email" element={<EmailVerification />} />
+
+      {/* Customer Routes */}
+      <Route path="register" element={<CustomerRegister />} />
+      <Route path="login" element={<CustomerLogin />} />
+      <Route path="forgot-password" element={<ForgotPassword />} />
+      <Route
+        path="customer/profile"
+        element={
+          <ProtectedRoute allowedRoles={['ROLE_CUSTOMER']}>
+            <ProfileManagement />
+          </ProtectedRoute>
+        }
+      />
 
       {/* Seller Routes */}
       <Route path="seller/register" element={<SellerRegister />} />
@@ -20,7 +41,7 @@ const router = createBrowserRouter(
       <Route
         path="seller/dashboard"
         element={
-          <ProtectedRoute allowedRoles={['seller']}>
+          <ProtectedRoute allowedRoles={['ROLE_SELLER']}>
             <SellerDashboard />
           </ProtectedRoute>
         }
@@ -31,7 +52,7 @@ const router = createBrowserRouter(
       <Route
         path="admin/dashboard"
         element={
-          <ProtectedRoute allowedRoles={['admin']}>
+          <ProtectedRoute allowedRoles={['ROLE_ADMIN']}>
             <AdminDashboard />
           </ProtectedRoute>
         }

@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import SellerLoginView from './SellerLoginView';
 
 const SellerLoginContainer = () => {
-    const [email, setEmail] = useState('');
+    const [identifier, setIdentifier] = useState('');
     const [password, setPassword] = useState('');
     const [loginSeller, { isLoading, isError, error }] = useLoginSellerMutation();
     const dispatch = useDispatch();
@@ -15,8 +15,12 @@ const SellerLoginContainer = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const userData = await loginSeller({ email, password }).unwrap();
-            dispatch(setCredentials({ user: email, token: userData.token, role: 'seller' }));
+            const userData = await loginSeller({ identifier, password }).unwrap();
+            dispatch(setCredentials({
+                user: { name: userData.name, email: userData.email },
+                token: userData.token,
+                role: userData.role
+            }));
             navigate('/seller/dashboard');
         } catch (err) {
             console.error('Login failed:', err);
@@ -25,9 +29,9 @@ const SellerLoginContainer = () => {
 
     return (
         <SellerLoginView
-            email={email}
+            email={identifier}
             password={password}
-            onEmailChange={setEmail}
+            onEmailChange={setIdentifier}
             onPasswordChange={setPassword}
             onSubmit={handleSubmit}
             isLoading={isLoading}
