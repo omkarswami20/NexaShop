@@ -86,7 +86,6 @@ public class AuthDtos {
                         @Schema(description = "Full name of the customer", example = "Jane Doe") @NotBlank(message = "Name is required") String name,
                         @Schema(description = "Username for the account", example = "janedoe") @NotBlank(message = "Username is required") String username,
                         @Schema(description = "Email address", example = "jane@example.com") @NotBlank(message = "Email is required") @Email(message = "Invalid email format") String email,
-                        @Schema(description = "Phone number", example = "9876543210") @NotBlank(message = "Phone number is required") @Pattern(regexp = "^\\d{10}$", message = "Phone number must be 10 digits") String phone,
                         @Schema(description = "Password", example = "securePass123") @NotBlank(message = "Password is required") @Size(min = 6, message = "Password must be at least 6 characters") String password) {
         }
 

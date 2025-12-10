@@ -136,7 +136,7 @@ public class SellerService {
 
     public void verifyEmail(String token) {
         Seller seller = sellerRepository.findByEmailVerificationToken(token)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid Token"));
+                .orElseThrow(() -> new ResourceNotFoundException("Invalid Token"));
 
         if (seller.isEmailVerified()) {
             return;

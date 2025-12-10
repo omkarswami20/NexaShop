@@ -128,8 +128,17 @@ public class CommonAuthController {
     })
     @PostMapping("/verify-email")
     public ResponseEntity<?> verifyEmail(@RequestBody AuthDtos.VerifyEmailRequest request) {
-        sellerService.verifyEmail(request.token());
-        return ResponseEntity.ok(Map.of("message", "Email verified successfully. Please wait for Admin Approval."));
+        try {
+            sellerService.verifyEmail(request.token());
+            return ResponseEntity.ok(Map.of("message", "Email verified successfully. Please wait for Admin Approval."));
+        } catch (ResourceNotFoundException e) {
+            try {
+                customerService.verifyEmail(request.token());
+                return ResponseEntity.ok(Map.of("message", "Email verified successfully! You can now login."));
+            } catch (Exception ex) {
+                return ResponseEntity.badRequest().body(Map.of("message", "Invalid verification token"));
+            }
+        }
     }
 
     @Operation(summary = "Logout user", security = @SecurityRequirement(name = "bearerAuth"))

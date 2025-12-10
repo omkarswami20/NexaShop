@@ -3,6 +3,8 @@ import { Outlet, Link, useNavigate } from 'react-router-dom';
 import { AppBar, Toolbar, Typography, Button, Box, Container, IconButton, Menu, MenuItem } from '@mui/material';
 import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
 import AccountCircle from '@mui/icons-material/AccountCircle';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { useSelector, useDispatch } from 'react-redux';
 import { selectCurrentToken, selectCurrentRole, logout } from '../../store/slices/auth.slice';
 
@@ -29,6 +31,7 @@ const Layout = () => {
 
     return (
         <Box sx={{ flexGrow: 1, minHeight: '100vh', display: 'flex', flexDirection: 'column', bgcolor: 'background.default' }}>
+            <ToastContainer position="top-right" autoClose={3000} />
             <AppBar position="sticky" elevation={0} sx={{ bgcolor: 'background.paper', borderBottom: '1px solid', borderColor: 'divider' }}>
                 <Container maxWidth="xl">
                     <Toolbar disableGutters sx={{ py: 1 }}>
@@ -51,29 +54,34 @@ const Layout = () => {
                             NEXASHOP
                         </Typography>
 
-                        <Box sx={{ display: 'flex', gap: 1.5 }}>
+                        <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'center' }}>
+                            <Button
+                                component={Link}
+                                to="/seller/register"
+                                sx={{ color: 'text.primary', display: { xs: 'none', md: 'block' } }}
+                            >
+                                Sell on NexaShop
+                            </Button>
+
                             {!token ? (
                                 <>
                                     <Button
                                         color="inherit"
                                         component={Link}
-                                        to="/seller/login"
+                                        to="/login"
                                         sx={{
                                             color: 'text.primary',
-                                            '&:hover': {
-                                                bgcolor: 'action.hover',
-                                            }
                                         }}
                                     >
-                                        Seller Login
+                                        Log In
                                     </Button>
                                     <Button
                                         variant="contained"
                                         color="primary"
                                         component={Link}
-                                        to="/admin/login"
+                                        to="/register"
                                     >
-                                        Admin Portal
+                                        Sign Up
                                     </Button>
                                 </>
                             ) : (
@@ -117,6 +125,9 @@ const Layout = () => {
                                         )}
                                         {role === 'ROLE_ADMIN' && (
                                             <MenuItem onClick={() => { handleClose(); navigate('/admin/dashboard'); }}>Dashboard</MenuItem>
+                                        )}
+                                        {(role === 'ROLE_CUSTOMER' || role === 'CUSTOMER') && (
+                                            <MenuItem onClick={() => { handleClose(); navigate('/customer/profile'); }}>My Profile</MenuItem>
                                         )}
                                         <MenuItem onClick={handleLogout}>Logout</MenuItem>
                                     </Menu>

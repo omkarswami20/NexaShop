@@ -83,4 +83,16 @@ public class EmailService {
 
         sendSimpleEmail(seller.getEmail(), subject, text);
     }
+
+    public void sendCustomerVerificationEmail(com.nexashop.backend.entity.Customer customer) {
+        String subject = "Nexashop - Verify Your Email";
+        String link = frontendUrl + "/verify-email?token=" + customer.getEmailVerificationToken();
+        String text = "Dear " + customer.getName() + ",\n\n" +
+                "Welcome to Nexashop! Please verify your email address by clicking the link below:\n" +
+                link + "\n\n" +
+                "This link will expire in 24 hours.\n\n" +
+                "Best Regards,\n" +
+                "Nexashop Team";
+        sendSimpleEmail(customer.getEmail(), subject, text);
+    }
 }

@@ -19,17 +19,20 @@ public class CustomerService {
         private final JwtUtils jwtUtils;
         private final RefreshTokenService refreshTokenService;
         private final AddressRepository addressRepository;
+        private final EmailService emailService;
 
         public CustomerService(CustomerRepository customerRepository,
                         PasswordEncoder passwordEncoder,
                         JwtUtils jwtUtils,
                         RefreshTokenService refreshTokenService,
-                        AddressRepository addressRepository) {
+                        AddressRepository addressRepository,
+                        EmailService emailService) {
                 this.customerRepository = customerRepository;
                 this.passwordEncoder = passwordEncoder;
                 this.jwtUtils = jwtUtils;
                 this.refreshTokenService = refreshTokenService;
                 this.addressRepository = addressRepository;
+                this.emailService = emailService;
         }
 
         @Transactional
@@ -40,28 +43,38 @@ public class CustomerService {
                 if (customerRepository.existsByUsername(request.username())) {
                         throw new IllegalArgumentException("Username already exists");
                 }
-                if (customerRepository.existsByPhoneNumber(request.phone())) {
-                        throw new IllegalArgumentException("Phone number already exists");
-                }
+                // Phone check removed as it is optional/removed from registration
 
                 Customer customer = new Customer(
                                 request.name(),
                                 request.username(),
                                 request.email(),
-                                request.phone(),
                                 passwordEncoder.encode(request.password()));
 
-                // Auto-approve logic (no status field to set, just saving)
-                // We can trigger email verification here if needed, but for now we'll just save
+                customer.setEmailVerificationToken(java.util.UUID.randomUUID().toString());
+                customer.setEmailVerified(false);
 
-                return customerRepository.save(customer);
+                Customer savedCustomer = customerRepository.save(customer);
+
+                emailService.sendCustomerVerificationEmail(savedCustomer);
+
+                return savedCustomer;
+        }
+
+        @Transactional
+        public void verifyEmail(String token) {
+                Customer customer = customerRepository.findByEmailVerificationToken(token)
+                                .orElseThrow(() -> new IllegalArgumentException("Invalid verification token"));
+
+                customer.setEmailVerified(true);
+                customer.setEmailVerificationToken(null);
+                customerRepository.save(customer);
         }
 
         public AuthDtos.LoginResponse loginCustomer(AuthDtos.LoginRequest request) {
                 String identifier = request.identifier();
                 Customer customer = customerRepository.findByEmail(identifier)
                                 .or(() -> customerRepository.findByUsername(identifier))
-                                .or(() -> customerRepository.findByPhoneNumber(identifier))
                                 .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
 
                 if (!passwordEncoder.matches(request.password(), customer.getPassword())) {
@@ -85,7 +98,6 @@ public class CustomerService {
         @Transactional
         public void resetPassword(String identifier, String newPassword) {
                 Customer customer = customerRepository.findByEmail(identifier)
-                                .or(() -> customerRepository.findByPhoneNumber(identifier))
                                 .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
 
                 customer.setPassword(passwordEncoder.encode(newPassword));
@@ -102,9 +114,7 @@ public class CustomerService {
                                 customer.getName(),
                                 customer.getUsername(),
                                 customer.getEmail(),
-                                customer.getPhoneNumber(),
-                                customer.isEmailVerified(),
-                                customer.isPhoneVerified());
+                                customer.isEmailVerified());
         }
 
         @Transactional
@@ -114,7 +124,6 @@ public class CustomerService {
                                 .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
 
                 customer.setName(request.name());
-                customer.setPhoneNumber(request.phoneNumber());
                 // Email and Username usually not changeable easily or require re-verification
 
                 Customer updatedCustomer = customerRepository.save(customer);
@@ -123,9 +132,7 @@ public class CustomerService {
                                 updatedCustomer.getName(),
                                 updatedCustomer.getUsername(),
                                 updatedCustomer.getEmail(),
-                                updatedCustomer.getPhoneNumber(),
-                                updatedCustomer.isEmailVerified(),
-                                updatedCustomer.isPhoneVerified());
+                                updatedCustomer.isEmailVerified());
         }
 
         // Address Management

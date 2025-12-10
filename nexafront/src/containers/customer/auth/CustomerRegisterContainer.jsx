@@ -8,7 +8,6 @@ const CustomerRegisterContainer = () => {
         name: '',
         username: '',
         email: '',
-        phoneNumber: '',
         password: '',
         confirmPassword: ''
     });
@@ -30,7 +29,6 @@ const CustomerRegisterContainer = () => {
                 name: formData.name,
                 username: formData.username,
                 email: formData.email,
-                phone: formData.phoneNumber,
                 password: formData.password,
             };
             await registerCustomer(payload).unwrap();

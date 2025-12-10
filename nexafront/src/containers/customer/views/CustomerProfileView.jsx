@@ -1,77 +1,80 @@
 import React from 'react';
 
 const CustomerProfileView = ({ formData, onChange, onSubmit, isLoading, isUpdating, isError, error }) => {
-    if (isLoading) return <div className="text-center py-10">Loading profile...</div>;
-    if (isError) return <div className="text-center py-10 text-red-500">Error loading profile: {error?.data?.message || 'Unknown error'}</div>;
+    if (isLoading) return <div className="customer-page-bg"><div className="glass-panel" style={{ textAlign: 'center', color: 'white' }}>Loading profile...</div></div>;
+    if (isError) return <div className="customer-page-bg"><div className="glass-panel message-error">Error loading profile: {error?.data?.message || 'Unknown error'}</div></div>;
 
     return (
-        <div className="max-w-4xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-8">My Profile</h1>
-            <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-                <div className="px-4 py-5 sm:px-6">
-                    <h3 className="text-lg leading-6 font-medium text-gray-900">Personal Information</h3>
-                    <p className="mt-1 max-w-2xl text-sm text-gray-500">Update your personal details.</p>
-                </div>
-                <div className="border-t border-gray-200">
-                    <form onSubmit={onSubmit}>
-                        <dl>
-                            <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                                <dt className="text-sm font-medium text-gray-500">Full name</dt>
-                                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                                    <input
-                                        type="text"
-                                        name="name"
-                                        value={formData.name}
-                                        onChange={onChange}
-                                        className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                                    />
-                                </dd>
+        <div className="customer-page-bg" style={{ alignItems: 'flex-start', paddingTop: '40px' }}>
+            {/* Decorative Background Elements */}
+            <div className="orb orb-1"></div>
+            <div className="orb orb-2"></div>
+
+            <div className="profile-wrapper w-full"> {/* w-full is tailwind but wrapper handles logic if I wrote css right? actually no, wrapper had max-width. I need to make sure it's centered content */}
+
+                <div className="profile-card">
+                    <div className="profile-header">
+                        <h1>My Profile</h1>
+                        <p style={{ opacity: 0.8, marginTop: '5px' }}>Manage your personal information</p>
+                    </div>
+
+                    <div className="profile-body">
+                        <form onSubmit={onSubmit}>
+                            <div className="profile-field-group">
+                                <label className="profile-label">Full name</label>
+                                <input
+                                    type="text"
+                                    name="name"
+                                    value={formData.name}
+                                    onChange={onChange}
+                                    className="profile-input"
+                                />
                             </div>
-                            <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                                <dt className="text-sm font-medium text-gray-500">Username</dt>
-                                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                                <div className="profile-field-group">
+                                    <label className="profile-label">Username</label>
                                     <input
                                         type="text"
                                         value={formData.username}
                                         disabled
-                                        className="bg-gray-100 block w-full sm:text-sm border-gray-300 rounded-md cursor-not-allowed"
+                                        className="profile-input"
                                     />
-                                </dd>
-                            </div>
-                            <div className="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                                <dt className="text-sm font-medium text-gray-500">Email address</dt>
-                                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+                                </div>
+
+                                <div className="profile-field-group">
+                                    <label className="profile-label">Email address</label>
                                     <input
                                         type="email"
                                         value={formData.email}
                                         disabled
-                                        className="bg-gray-100 block w-full sm:text-sm border-gray-300 rounded-md cursor-not-allowed"
+                                        className="profile-input"
                                     />
-                                </dd>
+                                </div>
                             </div>
-                            <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-                                <dt className="text-sm font-medium text-gray-500">Phone number</dt>
-                                <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                                    <input
-                                        type="tel"
-                                        name="phoneNumber"
-                                        value={formData.phoneNumber}
-                                        onChange={onChange}
-                                        className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                                    />
-                                </dd>
+
+                            <div className="profile-field-group">
+                                <label className="profile-label">Phone number</label>
+                                <input
+                                    type="tel"
+                                    name="phoneNumber"
+                                    value={formData.phoneNumber}
+                                    onChange={onChange}
+                                    className="profile-input"
+                                />
                             </div>
-                        </dl>
-                        <div className="px-4 py-3 bg-gray-50 text-right sm:px-6">
-                            <button
-                                type="submit"
-                                disabled={isUpdating}
-                                className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
-                            >
-                                {isUpdating ? 'Saving...' : 'Save'}
-                            </button>
-                        </div>
-                    </form>
+
+                            <div className="profile-actions">
+                                <button
+                                    type="submit"
+                                    disabled={isUpdating}
+                                    className="btn-save"
+                                >
+                                    {isUpdating ? 'Saving...' : 'Save Changes'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>

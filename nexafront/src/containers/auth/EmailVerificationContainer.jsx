@@ -6,7 +6,7 @@ import EmailVerificationView from './EmailVerificationView';
 const EmailVerificationContainer = () => {
     const [searchParams] = useSearchParams();
     const token = searchParams.get('token');
-    const [verifyEmail, { isLoading, isSuccess, isError, error }] = useVerifyEmailMutation();
+    const [verifyEmail, { data, isLoading, isSuccess, isError, error }] = useVerifyEmailMutation();
     const [verified, setVerified] = useState(false);
 
     useEffect(() => {
@@ -19,12 +19,13 @@ const EmailVerificationContainer = () => {
     }, [token, verifyEmail, verified]);
 
     return (
-        <EmailVerificationView 
+        <EmailVerificationView
             token={token}
             isLoading={isLoading}
             isSuccess={isSuccess}
             verified={verified}
             error={error}
+            data={data}
         />
     );
 };

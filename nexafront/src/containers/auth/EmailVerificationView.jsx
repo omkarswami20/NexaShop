@@ -4,21 +4,26 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
 import { Link } from 'react-router-dom';
 
-const EmailVerificationView = ({ token, isLoading, isSuccess, verified, error }) => {
+const EmailVerificationView = ({ token, isLoading, isSuccess, verified, error, data }) => {
+
+    const isAdminApproval = data?.message?.toLowerCase().includes("admin approval");
+    const loginLink = isAdminApproval ? "/seller/login" : "/login";
+    const buttonText = isAdminApproval ? "Go to Seller Login" : "Go to Login";
+
     return (
-        <Box 
-            display="flex" 
-            justifyContent="center" 
-            alignItems="center" 
-            minHeight="100vh" 
+        <Box
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            minHeight="100vh"
             bgcolor="grey.100"
         >
-            <Paper 
+            <Paper
                 elevation={0}
-                sx={{ 
-                    p: 5, 
-                    maxWidth: 500, 
-                    width: '100%', 
+                sx={{
+                    p: 5,
+                    maxWidth: 500,
+                    width: '100%',
                     textAlign: 'center',
                     border: '1px solid',
                     borderColor: 'divider'
@@ -38,17 +43,15 @@ const EmailVerificationView = ({ token, isLoading, isSuccess, verified, error })
                             Email Verified!
                         </Typography>
                         <Typography color="text.secondary" paragraph>
-                            Your email has been successfully verified. 
-                            Your account is now pending Admin Approval. 
-                            You will receive an email once your account is approved.
+                            {data?.message || 'Your email has been successfully verified.'}
                         </Typography>
-                        <Button 
-                            component={Link} 
-                            to="/seller/login" 
-                            variant="contained" 
+                        <Button
+                            component={Link}
+                            to={loginLink}
+                            variant="contained"
                             sx={{ mt: 2 }}
                         >
-                            Go to Login
+                            {buttonText}
                         </Button>
                     </Box>
                 ) : (
@@ -60,10 +63,10 @@ const EmailVerificationView = ({ token, isLoading, isSuccess, verified, error })
                         <Typography color="text.secondary" paragraph>
                             {error?.data?.message || 'We could not verify your email. The link may be invalid or expired.'}
                         </Typography>
-                        <Button 
-                            component={Link} 
-                            to="/seller/login" 
-                            variant="outlined" 
+                        <Button
+                            component={Link}
+                            to="/seller/login"
+                            variant="outlined"
                             sx={{ mt: 2 }}
                         >
                             Back to Login

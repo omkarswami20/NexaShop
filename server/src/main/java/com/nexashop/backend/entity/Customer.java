@@ -22,18 +22,12 @@ public class Customer {
     @Column(unique = true, nullable = false)
     private String email;
 
-    @Column(unique = true, nullable = false)
-    private String phoneNumber;
-
     @com.fasterxml.jackson.annotation.JsonIgnore
     @Column(nullable = false)
     private String password;
 
     private boolean isEmailVerified = false;
-    private boolean isPhoneVerified = false;
 
-    private String otp;
-    private LocalDateTime otpExpiry;
     private String emailVerificationToken;
 
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -45,11 +39,10 @@ public class Customer {
     public Customer() {
     }
 
-    public Customer(String name, String username, String email, String phoneNumber, String password) {
+    public Customer(String name, String username, String email, String password) {
         this.name = name;
         this.username = username;
         this.email = email;
-        this.phoneNumber = phoneNumber;
         this.password = password;
     }
 
@@ -97,14 +90,6 @@ public class Customer {
         this.email = email;
     }
 
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
-
     public String getPassword() {
         return password;
     }
@@ -119,30 +104,6 @@ public class Customer {
 
     public void setEmailVerified(boolean emailVerified) {
         isEmailVerified = emailVerified;
-    }
-
-    public boolean isPhoneVerified() {
-        return isPhoneVerified;
-    }
-
-    public void setPhoneVerified(boolean phoneVerified) {
-        isPhoneVerified = phoneVerified;
-    }
-
-    public String getOtp() {
-        return otp;
-    }
-
-    public void setOtp(String otp) {
-        this.otp = otp;
-    }
-
-    public LocalDateTime getOtpExpiry() {
-        return otpExpiry;
-    }
-
-    public void setOtpExpiry(LocalDateTime otpExpiry) {
-        this.otpExpiry = otpExpiry;
     }
 
     public String getEmailVerificationToken() {

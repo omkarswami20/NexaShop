@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { 
-    useGetProfileQuery, 
+import {
+    useGetProfileQuery,
     useUpdateProfileMutation,
-    useGetAddressesQuery, 
-    useAddAddressMutation, 
-    useUpdateAddressMutation, 
-    useDeleteAddressMutation 
+    useGetAddressesQuery,
+    useAddAddressMutation,
+    useUpdateAddressMutation,
+    useDeleteAddressMutation
 } from '../../../store/api/customerApi';
 import ProfileManagementView from '../views/ProfileManagementView';
 
@@ -13,10 +13,9 @@ const ProfileManagementContainer = () => {
     // Profile Logic
     const { data: profile, isLoading: isProfileLoading, isError: isProfileError, error: profileError } = useGetProfileQuery();
     const [updateProfile, { isLoading: isUpdatingProfile }] = useUpdateProfileMutation();
-    
+
     const [profileFormData, setProfileFormData] = useState({
         name: '',
-        phoneNumber: '',
         email: '',
         username: ''
     });
@@ -25,7 +24,6 @@ const ProfileManagementContainer = () => {
         if (profile) {
             setProfileFormData({
                 name: profile.name,
-                phoneNumber: profile.phoneNumber,
                 email: profile.email,
                 username: profile.username
             });
@@ -40,8 +38,7 @@ const ProfileManagementContainer = () => {
         e.preventDefault();
         try {
             await updateProfile({
-                name: profileFormData.name,
-                phoneNumber: profileFormData.phoneNumber
+                name: profileFormData.name
             }).unwrap();
             alert("Profile updated successfully!");
         } catch (err) {

@@ -5,6 +5,8 @@ import { setCredentials } from '../../../store/slices/auth.slice';
 import { useNavigate } from 'react-router-dom';
 import CustomerLoginView from '../views/CustomerLoginView';
 
+import { toast } from 'react-toastify';
+
 const CustomerLoginContainer = () => {
     const [identifier, setIdentifier] = useState('');
     const [password, setPassword] = useState('');
@@ -21,9 +23,11 @@ const CustomerLoginContainer = () => {
                 token: userData.token,
                 role: userData.role
             }));
-            navigate('/customer/profile'); // Redirect to profile/dashboard
+            toast.success('Login successful!');
+            navigate('/customer/profile');
         } catch (err) {
             console.error('Login failed:', err);
+            toast.error(err?.data?.message || 'Login failed. Please check your credentials.');
         }
     };
 
