@@ -22,7 +22,7 @@ const router = createBrowserRouter(
       <Route
         path="seller/dashboard"
         element={
-          <ProtectedRoute allowedRoles={['seller']}>
+          <ProtectedRoute allowedRoles={['ROLE_SELLER']}>
             <SellerDashboard />
           </ProtectedRoute>
         }
@@ -33,7 +33,7 @@ const router = createBrowserRouter(
       <Route
         path="admin/dashboard"
         element={
-          <ProtectedRoute allowedRoles={['admin']}>
+          <ProtectedRoute allowedRoles={['ROLE_ADMIN']}>
             <AdminDashboard />
           </ProtectedRoute>
         }

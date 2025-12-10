@@ -112,10 +112,10 @@ const Layout = () => {
                                             }
                                         }}
                                     >
-                                        {role === 'seller' && (
+                                        {role === 'ROLE_SELLER' && (
                                             <MenuItem onClick={() => { handleClose(); navigate('/seller/dashboard'); }}>Dashboard</MenuItem>
                                         )}
-                                        {role === 'admin' && (
+                                        {role === 'ROLE_ADMIN' && (
                                             <MenuItem onClick={() => { handleClose(); navigate('/admin/dashboard'); }}>Dashboard</MenuItem>
                                         )}
                                         <MenuItem onClick={handleLogout}>Logout</MenuItem>

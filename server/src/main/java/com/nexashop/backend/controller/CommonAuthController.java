@@ -5,8 +5,10 @@ import com.nexashop.backend.entity.Seller;
 import com.nexashop.backend.repository.SellerRepository;
 import com.nexashop.backend.security.JwtUtils;
 import com.nexashop.backend.service.AdminAuthService;
+import com.nexashop.backend.service.OtpService;
 import com.nexashop.backend.service.RefreshTokenService;
 import com.nexashop.backend.service.SellerService;
+import com.nexashop.backend.exception.ResourceNotFoundException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -31,17 +33,20 @@ public class CommonAuthController {
     private final SellerRepository sellerRepository;
     private final SellerService sellerService;
     private final AdminAuthService adminAuthService;
+    private final OtpService otpService;
 
     public CommonAuthController(RefreshTokenService refreshTokenService,
             JwtUtils jwtUtils,
             SellerRepository sellerRepository,
             SellerService sellerService,
-            AdminAuthService adminAuthService) {
+            AdminAuthService adminAuthService,
+            OtpService otpService) {
         this.refreshTokenService = refreshTokenService;
         this.jwtUtils = jwtUtils;
         this.sellerRepository = sellerRepository;
         this.sellerService = sellerService;
         this.adminAuthService = adminAuthService;
+        this.otpService = otpService;
     }
 
     // ------------------- GENERAL AUTH -------------------
@@ -69,7 +74,19 @@ public class CommonAuthController {
                 .orElseThrow(() -> new RuntimeException("Refresh token is not in database!"));
     }
 
-    @Operation(summary = "Verify OTP", description = "Verifies the OTP sent to the user's phone number. If successful, sends an email verification link.")
+    @Operation(summary = "Send OTP", description = "Generates and sends an OTP to the provided phone number.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OTP sent successfully"),
+            @ApiResponse(responseCode = "500", description = "Failed to send OTP")
+    })
+    @org.springframework.web.bind.annotation.GetMapping("/send-otp")
+    public ResponseEntity<?> sendOtp(@org.springframework.web.bind.annotation.RequestParam String phone) {
+        String otp = otpService.generateOtp();
+        otpService.sendOtp(phone, otp);
+        return ResponseEntity.ok(Map.of("message", "OTP sent"));
+    }
+
+    @Operation(summary = "Verify OTP", description = "Verifies the OTP sent to the user's phone number.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OTP verified successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid OTP or OTP expired"),
@@ -77,9 +94,23 @@ public class CommonAuthController {
     })
     @PostMapping("/verify-otp")
     public ResponseEntity<?> verifyOtp(@RequestBody AuthDtos.VerifyOtpRequest request) {
-        sellerService.verifyOtp(request.identifier(), request.otp());
-        return ResponseEntity
-                .ok(Map.of("message", "OTP verified successfully. Please check your email for verification link."));
+        // 1. Try Seller Verification (DB) - Prioritize this to ensure DB update for
+        // registration
+        try {
+            sellerService.verifyOtp(request.identifier(), request.otp());
+            // Also clear from memory if present to keep it clean
+            otpService.validateOtp(request.identifier(), request.otp());
+            return ResponseEntity
+                    .ok(Map.of("message", "OTP verified successfully. Please check your email for verification link."));
+        } catch (ResourceNotFoundException | IllegalArgumentException e) {
+            // 2. Fallback to in-memory OTP service (Generic Flow)
+            // If user not found in DB or OTP doesn't match DB (but might match memory for
+            // generic flow)
+            if (otpService.validateOtp(request.identifier(), request.otp())) {
+                return ResponseEntity.ok(Map.of("message", "OTP verified successfully"));
+            }
+            return ResponseEntity.badRequest().body(Map.of("message", "Invalid OTP or User not found"));
+        }
     }
 
     @Operation(summary = "Verify Email", description = "Verifies the email using the token sent via email link. If successful, marks email as verified.")
