@@ -1,9 +1,7 @@
 package com.nexashop.backend.service;
 
-import com.nexashop.backend.dto.LoginResponse;
-import com.nexashop.backend.dto.SellerLoginRequest;
-import com.nexashop.backend.dto.SellerRegisterRequest;
-import com.nexashop.backend.dto.UpdateSellerStatusRequest;
+import com.nexashop.backend.dto.AuthDtos;
+import com.nexashop.backend.dto.ProductDtos;
 import com.nexashop.backend.entity.RefreshToken;
 import com.nexashop.backend.entity.Seller;
 import com.nexashop.backend.exception.ResourceNotFoundException;
@@ -43,20 +41,20 @@ public class SellerService {
         this.otpService = otpService;
     }
 
-    public Seller registerSeller(SellerRegisterRequest request) {
-        if (sellerRepository.findByEmail(request.getEmail()).isPresent()) {
+    public Seller registerSeller(AuthDtos.SellerRegisterRequest request) {
+        if (sellerRepository.findByEmail(request.email()).isPresent()) {
             throw new IllegalArgumentException("Email already exists");
         }
-        if (sellerRepository.findByPhoneNumber(request.getPhoneNumber()).isPresent()) {
+        if (sellerRepository.findByPhoneNumber(request.phone()).isPresent()) {
             throw new IllegalArgumentException("Phone number already exists");
         }
 
         Seller seller = new Seller();
-        seller.setName(request.getName());
-        seller.setEmail(request.getEmail());
-        seller.setPhoneNumber(request.getPhoneNumber());
-        seller.setPassword(passwordEncoder.encode(request.getPassword()));
-        seller.setStoreName(request.getStoreName());
+        seller.setName(request.ownerName());
+        seller.setEmail(request.email());
+        seller.setPhoneNumber(request.phone());
+        seller.setPassword(passwordEncoder.encode(request.password()));
+        seller.setStoreName(request.businessName());
         seller.setStatus(Seller.SellerStatus.PENDING_APPROVAL);
 
         // Generate OTP
@@ -77,11 +75,11 @@ public class SellerService {
         return savedSeller;
     }
 
-    public LoginResponse loginSeller(com.nexashop.backend.dto.LoginRequest request) {
-        Seller seller = sellerRepository.findByEmailOrPhoneNumber(request.getIdentifier(), request.getIdentifier())
+    public AuthDtos.LoginResponse loginSeller(AuthDtos.LoginRequest request) {
+        Seller seller = sellerRepository.findByEmailOrPhoneNumber(request.identifier(), request.identifier())
                 .orElseThrow(() -> new BadCredentialsException("Invalid Credentials"));
 
-        if (!passwordEncoder.matches(request.getPassword(), seller.getPassword())) {
+        if (!passwordEncoder.matches(request.password(), seller.getPassword())) {
             throw new BadCredentialsException("Invalid Credentials");
         }
 
@@ -102,7 +100,8 @@ public class SellerService {
         String token = jwtUtils.generateToken(seller.getEmail(), "ROLE_SELLER");
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(seller.getEmail());
 
-        return new LoginResponse(token, refreshToken.getToken(), seller.getName(), seller.getEmail(), "ROLE_SELLER");
+        return new AuthDtos.LoginResponse(token, refreshToken.getToken(), seller.getId(), seller.getName(),
+                seller.getEmail(), "ROLE_SELLER", seller.isEmailVerified(), seller.getStatus().name());
     }
 
     public void verifyOtp(String identifier, String otp) {
@@ -159,13 +158,13 @@ public class SellerService {
         return sellerRepository.findAll();
     }
 
-    public Seller updateSellerStatus(UpdateSellerStatusRequest request) {
-        Seller seller = sellerRepository.findById(request.getSellerId())
+    public Seller updateSellerStatus(ProductDtos.UpdateSellerStatusRequest request) {
+        Seller seller = sellerRepository.findById(request.sellerId())
                 .orElseThrow(() -> new ResourceNotFoundException("Seller not found"));
 
-        seller.setStatus(request.getNewStatus());
+        seller.setStatus(Seller.SellerStatus.valueOf(request.status()));
         Seller updatedSeller = sellerRepository.save(seller);
-        emailService.sendStatusNotification(updatedSeller, request.getRejectionReason());
+        emailService.sendStatusNotification(updatedSeller, request.rejectionReason());
 
         return updatedSeller;
     }

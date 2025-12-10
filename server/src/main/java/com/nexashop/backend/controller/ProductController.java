@@ -1,6 +1,6 @@
 package com.nexashop.backend.controller;
 
-import com.nexashop.backend.dto.ProductRequest;
+import com.nexashop.backend.dto.ProductDtos;
 import com.nexashop.backend.entity.Product;
 import com.nexashop.backend.service.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -15,6 +15,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/products")
+@io.swagger.v3.oas.annotations.tags.Tag(name = "Product Management", description = "Endpoints for managing products, stock, and status")
 public class ProductController {
 
     private final ProductService productService;
@@ -25,7 +26,8 @@ public class ProductController {
 
     @Operation(summary = "Add a new product", security = @SecurityRequirement(name = "bearerAuth"))
     @PostMapping
-    public ResponseEntity<Product> addProduct(@Valid @RequestBody ProductRequest request, Principal principal) {
+    public ResponseEntity<Product> addProduct(@Valid @RequestBody ProductDtos.ProductRequest request,
+            Principal principal) {
         return ResponseEntity.ok(productService.addProduct(request, principal.getName()));
     }
 
@@ -52,7 +54,7 @@ public class ProductController {
     @Operation(summary = "Update a product", security = @SecurityRequirement(name = "bearerAuth"))
     @PutMapping("/{id}")
     public ResponseEntity<Product> updateProduct(@PathVariable Long id,
-            @Valid @RequestBody ProductRequest request, Principal principal) {
+            @Valid @RequestBody ProductDtos.ProductRequest request, Principal principal) {
         return ResponseEntity.ok(productService.updateProduct(id, request, principal.getName()));
     }
 
@@ -66,16 +68,16 @@ public class ProductController {
     @Operation(summary = "Update product status", security = @SecurityRequirement(name = "bearerAuth"))
     @PatchMapping("/{id}/status")
     public ResponseEntity<Product> updateProductStatus(@PathVariable Long id,
-            @Valid @RequestBody com.nexashop.backend.dto.ProductStatusRequest request, Principal principal) {
+            @Valid @RequestBody ProductDtos.ProductStatusRequest request, Principal principal) {
         return ResponseEntity
-                .ok(productService.updateProductStatus(id, request.getStatus(), principal.getName()));
+                .ok(productService.updateProductStatus(id, request.status(), principal.getName()));
     }
 
     @Operation(summary = "Update product stock", security = @SecurityRequirement(name = "bearerAuth"))
     @PatchMapping("/{id}/stock")
     public ResponseEntity<Product> updateProductStock(@PathVariable Long id,
-            @Valid @RequestBody com.nexashop.backend.dto.ProductStockRequest request, Principal principal) {
-        return ResponseEntity.ok(productService.updateProductStock(id, request.getStockQuantity(),
+            @Valid @RequestBody ProductDtos.ProductStockRequest request, Principal principal) {
+        return ResponseEntity.ok(productService.updateProductStock(id, request.quantity(),
                 principal.getName()));
     }
 
