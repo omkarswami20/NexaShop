@@ -1,5 +1,6 @@
 package com.nexashop.backend.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -7,68 +8,76 @@ import jakarta.validation.constraints.Size;
 
 public class AuthDtos {
 
+        @Schema(description = "Request object for user login")
         public record LoginRequest(
-                        @NotBlank(message = "Identifier (Email or Phone) is required") String identifier,
+                        @Schema(description = "User's email or phone number", example = "seller@example.com") @NotBlank(message = "Identifier (Email or Phone) is required") String identifier,
 
-                        @NotBlank(message = "Password is required") String password) {
+                        @Schema(description = "User's password", example = "password123") @NotBlank(message = "Password is required") String password) {
         }
 
+        @Schema(description = "Response object for successful login")
         public record LoginResponse(
-                        String token,
-                        String refreshToken,
-                        String type,
-                        Long id,
-                        String name,
-                        String email,
-                        String role,
-                        boolean isVerified,
-                        String status) {
+                        @Schema(description = "JWT access token") String token,
+                        @Schema(description = "JWT refresh token") String refreshToken,
+                        @Schema(description = "Token type", example = "Bearer") String type,
+                        @Schema(description = "User ID") Long id,
+                        @Schema(description = "User's full name") String name,
+                        @Schema(description = "User's email address") String email,
+                        @Schema(description = "User's role", example = "SELLER") String role,
+                        @Schema(description = "Whether the user's email is verified") boolean isVerified,
+                        @Schema(description = "User's account status", example = "APPROVED") String status) {
                 public LoginResponse(String token, String refreshToken, Long id, String name, String email, String role,
                                 boolean isVerified, String status) {
                         this(token, refreshToken, "Bearer", id, name, email, role, isVerified, status);
                 }
         }
 
+        @Schema(description = "Request object for seller registration")
         public record SellerRegisterRequest(
-                        @NotBlank(message = "Business Name is required") String businessName,
+                        @Schema(description = "Name of the business/store", example = "My Awesome Store") @NotBlank(message = "Business Name is required") String businessName,
 
-                        @NotBlank(message = "Owner Name is required") String ownerName,
+                        @Schema(description = "Full name of the owner", example = "John Doe") @NotBlank(message = "Owner Name is required") String ownerName,
 
-                        @NotBlank(message = "Email is required") @Email(message = "Invalid email format") String email,
+                        @Schema(description = "Owner's email address", example = "john@example.com") @NotBlank(message = "Email is required") @Email(message = "Invalid email format") String email,
 
-                        @NotBlank(message = "Phone number is required") @Pattern(regexp = "^\\d{10}$", message = "Phone number must be 10 digits") String phone,
+                        @Schema(description = "Owner's phone number", example = "9876543210") @NotBlank(message = "Phone number is required") @Pattern(regexp = "^\\d{10}$", message = "Phone number must be 10 digits") String phone,
 
-                        @NotBlank(message = "Password is required") @Size(min = 6, message = "Password must be at least 6 characters") String password,
+                        @Schema(description = "Password for the account", example = "securePass123") @NotBlank(message = "Password is required") @Size(min = 6, message = "Password must be at least 6 characters") String password,
 
-                        @NotBlank(message = "Address is required") String address) {
+                        @Schema(description = "Business address", example = "123 Main St, City, Country") @NotBlank(message = "Address is required") String address) {
         }
 
+        @Schema(description = "Request object for refreshing the access token")
         public record TokenRefreshRequest(
-                        @NotBlank(message = "Refresh token is required") String refreshToken) {
+                        @Schema(description = "The refresh token received during login") @NotBlank(message = "Refresh token is required") String refreshToken) {
         }
 
+        @Schema(description = "Response object containing new access and refresh tokens")
         public record TokenRefreshResponse(
-                        String accessToken,
-                        String refreshToken,
-                        String tokenType) {
+                        @Schema(description = "New JWT access token") String accessToken,
+                        @Schema(description = "New JWT refresh token") String refreshToken,
+                        @Schema(description = "Token type", example = "Bearer") String tokenType) {
                 public TokenRefreshResponse(String accessToken, String refreshToken) {
                         this(accessToken, refreshToken, "Bearer");
                 }
         }
 
+        @Schema(description = "Request object for verifying OTP")
         public record VerifyOtpRequest(
-                        @NotBlank(message = "Identifier (Email or Phone) is required") String identifier,
+                        @Schema(description = "User's email or phone number") @NotBlank(message = "Identifier (Email or Phone) is required") String identifier,
 
-                        @NotBlank(message = "OTP is required") String otp) {
+                        @Schema(description = "One-Time Password sent to the user", example = "123456") @NotBlank(message = "OTP is required") String otp) {
         }
 
+        @Schema(description = "Request object for verifying email via token")
         public record VerifyEmailRequest(
-                        @NotBlank(message = "Token is required") String token) {
+                        @Schema(description = "Verification token from the email link") @NotBlank(message = "Token is required") String token) {
         }
 
+        @Schema(description = "Request object for admin login")
         public record AdminLoginRequest(
-                        @NotBlank(message = "Email is required") @Email(message = "Invalid email format") String email,
+                        @Schema(description = "Admin's email address", example = "admin@nexashop.com") @NotBlank(message = "Email is required") @Email(message = "Invalid email format") String email,
 
-                        @NotBlank(message = "Password is required") String password) {
+                        @Schema(description = "Admin's password") @NotBlank(message = "Password is required") String password) {
         }
 }

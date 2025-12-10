@@ -112,6 +112,18 @@ const SellerRegisterView = ({
                 required
                 variant="outlined"
             />
+            <TextField
+                fullWidth
+                label="Address"
+                name="address"
+                value={formData.address}
+                onChange={onChange}
+                margin="normal"
+                required
+                multiline
+                rows={3}
+                variant="outlined"
+            />
         </AuthLayout>
     );
 };

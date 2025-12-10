@@ -11,6 +11,7 @@ const SellerRegisterContainer = () => {
         password: '',
         storeName: '',
         phoneNumber: '',
+        address: '',
     });
     const [showOtp, setShowOtp] = useState(false);
     const navigate = useNavigate();
@@ -23,7 +24,15 @@ const SellerRegisterContainer = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await registerSeller(formData).unwrap();
+            const payload = {
+                ownerName: formData.name,
+                email: formData.email,
+                password: formData.password,
+                businessName: formData.storeName,
+                phone: formData.phoneNumber,
+                address: formData.address,
+            };
+            await registerSeller(payload).unwrap();
             // Show OTP Modal instead of clearing form immediately
             setShowOtp(true);
         } catch (err) {
@@ -40,6 +49,7 @@ const SellerRegisterContainer = () => {
             password: '',
             storeName: '',
             phoneNumber: '',
+            address: '',
         });
         // You might want to show a success message or redirect
         alert("Phone Verified! Please check your email for the verification link.");

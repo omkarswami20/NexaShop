@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
     Box,
     Typography,
@@ -23,77 +23,21 @@ import {
     Delete as DeleteIcon,
     Folder as FolderIcon,
 } from '@mui/icons-material';
-import {
-    useGetCategoriesQuery,
-    useCreateCategoryMutation,
-    useUpdateCategoryMutation,
-    useDeleteCategoryMutation,
-} from '../../store/api/api.slice';
 
-const CategoryManagement = () => {
-    const { data: categories, isLoading, error } = useGetCategoriesQuery();
-    const [createCategory] = useCreateCategoryMutation();
-    const [updateCategory] = useUpdateCategoryMutation();
-    const [deleteCategory] = useDeleteCategoryMutation();
-
-    const [dialogOpen, setDialogOpen] = useState(false);
-    const [editingCategory, setEditingCategory] = useState(null);
-    const [formData, setFormData] = useState({ name: '', description: '' });
-    const [notification, setNotification] = useState({ open: false, message: '', severity: 'success' });
-
-    const handleOpenDialog = (category = null) => {
-        setEditingCategory(category);
-        setFormData({
-            name: category ? category.name : '',
-            description: category ? category.description : '',
-        });
-        setDialogOpen(true);
-    };
-
-    const handleCloseDialog = () => {
-        setDialogOpen(false);
-        setEditingCategory(null);
-        setFormData({ name: '', description: '' });
-    };
-
-    const handleSubmit = async () => {
-        try {
-            if (editingCategory) {
-                await updateCategory({
-                    id: editingCategory.id,
-                    ...formData,
-                }).unwrap();
-                showNotification('Category updated successfully');
-            } else {
-                await createCategory({
-                    ...formData,
-                }).unwrap();
-                showNotification('Category created successfully');
-            }
-            handleCloseDialog();
-        } catch (err) {
-            showNotification('Failed to save category', 'error');
-            console.error(err);
-        }
-    };
-
-    const handleDelete = async (id) => {
-        if (window.confirm('Are you sure you want to delete this category?')) {
-            try {
-                await deleteCategory(id).unwrap();
-                showNotification('Category deleted successfully');
-            } catch (err) {
-                showNotification('Failed to delete category', 'error');
-                console.error(err);
-            }
-        }
-    };
-
-    const showNotification = (message, severity = 'success') => {
-        setNotification({ open: true, message, severity });
-        setTimeout(() => setNotification({ ...notification, open: false }), 3000);
-    };
-
+const CategoryManagementView = ({
+    categories,
+    isLoading,
+    error,
+    dialogOpen,
+    editingCategory,
+    formData,
+    notification,
+    onOpenDialog,
+    onCloseDialog,
+    onSubmit,
+    onDelete,
+    onFormDataChange,
+}) => {
     if (isLoading) return <CircularProgress />;
     if (error) return <Alert severity="error">Error loading categories</Alert>;
 
@@ -106,7 +50,7 @@ const CategoryManagement = () => {
                 <Button
                     variant="contained"
                     startIcon={<AddIcon />}
-                    onClick={() => handleOpenDialog()}
+                    onClick={() => onOpenDialog()}
                 >
                     Add Category
                 </Button>
@@ -141,7 +85,7 @@ const CategoryManagement = () => {
                                 <IconButton
                                     edge="end"
                                     aria-label="edit"
-                                    onClick={() => handleOpenDialog(category)}
+                                    onClick={() => onOpenDialog(category)}
                                     size="small"
                                     sx={{ mr: 1 }}
                                 >
@@ -150,7 +94,7 @@ const CategoryManagement = () => {
                                 <IconButton
                                     edge="end"
                                     aria-label="delete"
-                                    onClick={() => handleDelete(category.id)}
+                                    onClick={() => onDelete(category.id)}
                                     size="small"
                                     color="error"
                                 >
@@ -167,7 +111,7 @@ const CategoryManagement = () => {
                 </List>
             </Paper>
 
-            <Dialog open={dialogOpen} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
+            <Dialog open={dialogOpen} onClose={onCloseDialog} maxWidth="sm" fullWidth>
                 <DialogTitle>
                     {editingCategory ? 'Edit Category' : 'Add Category'}
                 </DialogTitle>
@@ -178,7 +122,7 @@ const CategoryManagement = () => {
                         label="Category Name"
                         fullWidth
                         value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        onChange={(e) => onFormDataChange({ ...formData, name: e.target.value })}
                         required
                     />
                     <TextField
@@ -188,12 +132,12 @@ const CategoryManagement = () => {
                         multiline
                         rows={3}
                         value={formData.description}
-                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                        onChange={(e) => onFormDataChange({ ...formData, description: e.target.value })}
                     />
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleCloseDialog}>Cancel</Button>
-                    <Button onClick={handleSubmit} variant="contained" disabled={!formData.name}>
+                    <Button onClick={onCloseDialog}>Cancel</Button>
+                    <Button onClick={onSubmit} variant="contained" disabled={!formData.name}>
                         Save
                     </Button>
                 </DialogActions>
@@ -202,4 +146,4 @@ const CategoryManagement = () => {
     );
 };
 
-export default CategoryManagement;
+export default CategoryManagementView;
