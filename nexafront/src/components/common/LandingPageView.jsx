@@ -3,6 +3,7 @@ import { Box, Typography, Button, Grid, Paper, Container, Stack, Divider } from 
 import { Link } from 'react-router-dom';
 import StorefrontIcon from '@mui/icons-material/Storefront';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
+import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
 
 const LandingPageView = () => {
     return (
@@ -21,8 +22,56 @@ const LandingPageView = () => {
 
             <Container maxWidth="lg">
                 <Grid container spacing={4} justifyContent="center">
+                    {/* Customer Card */}
+                    <Grid item xs={12} md={4}>
+                        <Paper
+                            elevation={0}
+                            sx={{
+                                p: 5,
+                                height: '100%',
+                                border: '1px solid',
+                                borderColor: 'divider',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                textAlign: 'center'
+                            }}
+                        >
+                            <Box sx={{ mb: 3, color: 'primary.main' }}>
+                                <ShoppingBagIcon sx={{ fontSize: 56 }} />
+                            </Box>
+                            <Typography variant="h5" fontWeight="600" gutterBottom>
+                                Customer
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary" sx={{ mb: 4, maxWidth: 300 }}>
+                                Shop for the best products at the best prices.
+                            </Typography>
+                            <Button
+                                component={Link}
+                                to="/login"
+                                variant="contained"
+                                fullWidth
+                                size="large"
+                                sx={{ mb: 2 }}
+                            >
+                                Login
+                            </Button>
+                            <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5, mt: 1 }}>
+                                New Customer?
+                            </Typography>
+                            <Button
+                                component={Link}
+                                to="/register"
+                                variant="outlined"
+                                fullWidth
+                            >
+                                Register Now
+                            </Button>
+                        </Paper>
+                    </Grid>
+
                     {/* Seller Card */}
-                    <Grid item xs={12} md={5}>
+                    <Grid item xs={12} md={4}>
                         <Paper
                             elevation={0}
                             sx={{
@@ -40,7 +89,7 @@ const LandingPageView = () => {
                                 <StorefrontIcon sx={{ fontSize: 56 }} />
                             </Box>
                             <Typography variant="h5" fontWeight="600" gutterBottom>
-                                Existing Seller?
+                                Seller
                             </Typography>
                             <Typography variant="body2" color="text.secondary" sx={{ mb: 4, maxWidth: 300 }}>
                                 Log in to manage your orders, inventory, and payments.
@@ -56,7 +105,7 @@ const LandingPageView = () => {
                                 Login
                             </Button>
                             <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5, mt: 1 }}>
-                                New to NexaShop?
+                                New Seller?
                             </Typography>
                             <Button
                                 component={Link}
@@ -70,7 +119,7 @@ const LandingPageView = () => {
                     </Grid>
 
                     {/* Admin Card */}
-                    <Grid item xs={12} md={5}>
+                    <Grid item xs={12} md={4}>
                         <Paper
                             elevation={0}
                             sx={{
@@ -110,5 +159,7 @@ const LandingPageView = () => {
         </Box>
     );
 };
+
+
 
 export default LandingPageView;

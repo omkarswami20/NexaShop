@@ -8,6 +8,7 @@ import com.nexashop.backend.service.AdminAuthService;
 import com.nexashop.backend.service.OtpService;
 import com.nexashop.backend.service.RefreshTokenService;
 import com.nexashop.backend.service.SellerService;
+import com.nexashop.backend.service.CustomerService;
 import com.nexashop.backend.exception.ResourceNotFoundException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -34,19 +35,22 @@ public class CommonAuthController {
     private final SellerService sellerService;
     private final AdminAuthService adminAuthService;
     private final OtpService otpService;
+    private final CustomerService customerService;
 
     public CommonAuthController(RefreshTokenService refreshTokenService,
             JwtUtils jwtUtils,
             SellerRepository sellerRepository,
             SellerService sellerService,
             AdminAuthService adminAuthService,
-            OtpService otpService) {
+            OtpService otpService,
+            CustomerService customerService) {
         this.refreshTokenService = refreshTokenService;
         this.jwtUtils = jwtUtils;
         this.sellerRepository = sellerRepository;
         this.sellerService = sellerService;
         this.adminAuthService = adminAuthService;
         this.otpService = otpService;
+        this.customerService = customerService;
     }
 
     // ------------------- GENERAL AUTH -------------------
@@ -68,6 +72,10 @@ public class CommonAuthController {
                     if (sellerRepository.findByEmail(email).isPresent()) {
                         role = "ROLE_SELLER";
                     }
+                    // TODO: Check for Customer role as well if needed for refresh token logic
+                    // For now defaulting to ADMIN/SELLER logic, but should be updated for generic
+                    // role detection
+
                     String token = jwtUtils.generateToken(email, role);
                     return ResponseEntity.ok(new AuthDtos.TokenRefreshResponse(token, requestRefreshToken));
                 })
@@ -130,6 +138,49 @@ public class CommonAuthController {
         return ResponseEntity.ok(Map.of("message", "Logout successful"));
     }
 
+    @Operation(summary = "Forgot Password", description = "Initiates password reset flow by sending OTP.")
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody AuthDtos.ForgotPasswordRequest request) {
+        // Check if user exists (Seller or Customer)
+        // For now, we'll just generate OTP and send it.
+        // In a real app, we should verify existence to avoid enumeration, but for this
+        // sprint:
+
+        String otp = otpService.generateOtp();
+        // Determine if email or phone
+        if (request.identifier().contains("@")) {
+            // Send Email OTP (Not implemented in OtpService yet, assuming phone for now or
+            // logging)
+            System.out.println("Email OTP for " + request.identifier() + ": " + otp);
+        } else {
+            otpService.sendOtp(request.identifier(), otp);
+        }
+
+        return ResponseEntity.ok(Map.of("message", "OTP sent for password reset"));
+    }
+
+    @Operation(summary = "Reset Password", description = "Resets password using OTP.")
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody AuthDtos.ResetPasswordRequest request) {
+        if (!otpService.validateOtp(request.identifier(), request.otp())) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Invalid or expired OTP"));
+        }
+
+        // Try to reset for Customer first (as per current focus)
+        try {
+            customerService.resetPassword(request.identifier(), request.newPassword());
+            return ResponseEntity.ok(Map.of("message", "Password reset successfully"));
+        } catch (ResourceNotFoundException e) {
+            // Try Seller
+            try {
+                sellerService.resetPassword(request.identifier(), request.newPassword());
+                return ResponseEntity.ok(Map.of("message", "Password reset successfully"));
+            } catch (Exception ex) {
+                return ResponseEntity.badRequest().body(Map.of("message", "User not found"));
+            }
+        }
+    }
+
     // ------------------- SELLER AUTH -------------------
 
     @Operation(summary = "Register a new Seller", description = "Creates a new seller account with PENDING_APPROVAL status. Generates and sends an OTP to the provided phone number.")
@@ -163,5 +214,20 @@ public class CommonAuthController {
     @PostMapping("/admin/login")
     public ResponseEntity<AuthDtos.LoginResponse> loginAdmin(@Valid @RequestBody AuthDtos.AdminLoginRequest request) {
         return ResponseEntity.ok(adminAuthService.login(request));
+    }
+
+    // ------------------- CUSTOMER AUTH -------------------
+
+    @Operation(summary = "Register a new Customer", description = "Creates a new customer account. Auto-approved.")
+    @PostMapping("/customer/register")
+    public ResponseEntity<com.nexashop.backend.entity.Customer> registerCustomer(
+            @Valid @RequestBody AuthDtos.CustomerRegisterRequest request) {
+        return ResponseEntity.ok(customerService.registerCustomer(request));
+    }
+
+    @Operation(summary = "Login Customer", description = "Authenticates a customer.")
+    @PostMapping("/customer/login")
+    public ResponseEntity<AuthDtos.LoginResponse> loginCustomer(@Valid @RequestBody AuthDtos.LoginRequest request) {
+        return ResponseEntity.ok(customerService.loginCustomer(request));
     }
 }

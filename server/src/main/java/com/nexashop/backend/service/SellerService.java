@@ -168,4 +168,13 @@ public class SellerService {
 
         return updatedSeller;
     }
+
+    @Transactional
+    public void resetPassword(String identifier, String newPassword) {
+        Seller seller = sellerRepository.findByEmailOrPhoneNumber(identifier, identifier)
+                .orElseThrow(() -> new ResourceNotFoundException("Seller not found"));
+
+        seller.setPassword(passwordEncoder.encode(newPassword));
+        sellerRepository.save(seller);
+    }
 }

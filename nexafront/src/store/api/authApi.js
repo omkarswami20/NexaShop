@@ -42,9 +42,36 @@ export const authApi = api.injectEndpoints({
             query: () => ({
                 url: '/auth/logout',
                 method: 'POST',
-                body: credentials,
             }),
             transformResponse: transformLogoutResponse,
+        }),
+        registerCustomer: builder.mutation({
+            query: (credentials) => ({
+                url: '/auth/customer/register',
+                method: 'POST',
+                body: credentials,
+            }),
+        }),
+        loginCustomer: builder.mutation({
+            query: (credentials) => ({
+                url: '/auth/customer/login',
+                method: 'POST',
+                body: credentials,
+            }),
+        }),
+        forgotPassword: builder.mutation({
+            query: (data) => ({
+                url: '/auth/forgot-password',
+                method: 'POST',
+                body: data,
+            }),
+        }),
+        resetPassword: builder.mutation({
+            query: (data) => ({
+                url: '/auth/reset-password',
+                method: 'POST',
+                body: data,
+            }),
         }),
     }),
 });
@@ -56,4 +83,8 @@ export const {
     useVerifyEmailMutation,
     useLoginAdminMutation,
     useLogoutUserMutation,
+    useRegisterCustomerMutation,
+    useLoginCustomerMutation,
+    useForgotPasswordMutation,
+    useResetPasswordMutation,
 } = authApi;
